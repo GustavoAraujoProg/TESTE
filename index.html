@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tour Virtual 360° - Sistema VR Completo</title>
+    <title>Tour Virtual 360° - Sistema VR Aprimorado</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/webxr/VRButton.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.js"></script>
     <style>
         * {
             margin: 0;
@@ -29,72 +31,200 @@
             background-color: #000;
         }
 
-        .interactive-hotspot {
-            position: absolute;
-            width: 25px;
-            height: 25px;
-            background: rgba(128, 128, 128, 0.9);
-            border: 3px solid #ffffff;
-            border-radius: 50%;
-            cursor: pointer;
-            pointer-events: auto;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 14px;
-            font-weight: bold;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
+       .interactive-hotspot {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    background: rgba(128, 128, 128, 0.9);
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
 
-        @media (max-width: 768px) {
-            .interactive-hotspot {
-                width: 30px !important;
-                height: 30px !important;
-                font-size: 18px !important;
-                min-width: 44px !important;
-                min-height: 44px !important;
-                z-index: 9999 !important;
-                pointer-events: auto !important;
-                opacity: 1 !important;
-            }
-        }
+@media (max-width: 768px) {
+    .interactive-hotspot {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 18px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        z-index: 9999 !important;
+        pointer-events: auto !important;
+        opacity: 1 !important;
+    }
+    
+    .plan-hotspot {
+        width: 5px ;
+        height: 5px ;
+        
+    }
+}
 
-        @media (pointer: coarse) {
-            .interactive-hotspot {
-                min-width: 30px !important;
-                min-height: 30px !important;
-                z-index: 9999 !important;
-                pointer-events: auto !important;
-                opacity: 1 !important;
-            }
-            
-            .interactive-hotspot:active {
-                transform: scale(1.4) !important;
-                background: #007bff !important;
-                border-color: #ffffff !important;
-            }
-        }
+/* MOBILE - HOTSPOTS MAIORES APENAS NO MOBILE */
+@media (max-width: 768px), (pointer: coarse) {
+    .interactive-hotspot {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 18px !important;
+        border: 4px solid #ffffff !important;
+        z-index: 9999 !important;
+        pointer-events: auto !important;
+        opacity: 1 !important;
+        display: flex !important;
+        visibility: visible !important;
+        /* Área de toque mais sensível */
+        min-width: 50px !important;
+        min-height: 50px !important;
+    }
+}
+
+/* Para dispositivos touch */
+@media (pointer: coarse) {
+    .interactive-hotspot {
+        min-width: 30px !important;
+        min-height: 30px !important;
+        z-index: 9999 !important;
+        pointer-events: auto !important;
+        opacity: 1 !important;
+    }
+    
+    .interactive-hotspot:active {
+        transform: scale(1.4) !important;
+        background: #007bff !important;
+        border-color: #ffffff !important;
+    }
+}
+
+/* Garantir visibilidade em mobile */
+@media (max-width: 1024px) {
+    .interactive-hotspot {
+        z-index: 9999 !important;
+        pointer-events: auto !important;
+        opacity: 1 !important;
+        display: flex !important;
+    }
+}
         
         .interactive-hotspot:hover {
             background: #a0a0a0;
             transform: scale(1.2);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
-
-        #viewer {
-            width: 100%;
-            height: 100%;
-            cursor: grab;
-            user-select: none;
-            touch-action: pan-x pan-y !important;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
+        
+       .interactive-hotspot::before {
+    content: '';
+    font-size: 16px;
+    color: white;
+}
+        
+        .hotspot-tooltip {
+            position: fixed;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(30, 30, 30, 0.95));
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            max-width: 220px;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            z-index: 2001;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
         }
+
+        .hotspot-tooltip.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hotspot-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.95);
+        }
+
+        #interactive-info-panel {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 300px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        #interactive-info-panel.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .interactive-info-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+        
+        .interactive-info-content {
+            font-size: 14px;
+            line-height: 1.4;
+            color: #ccc;
+        }
+
+       #viewer {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    user-select: none;
+    touch-action: pan-x pan-y !important;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+}
+
+.interactive-hotspot {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    background: rgba(128, 128, 128, 0.9);
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
         
         #viewer:active {
             cursor: grabbing;
@@ -116,6 +246,7 @@
             justify-content: center;
             z-index: 2500;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+           
             backdrop-filter: blur(10px);
         }
 
@@ -165,6 +296,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 24px;
+           
         }
 
         .menu-title {
@@ -194,6 +326,7 @@
         .floor-plan-container {
             position: relative;
             width: 100%;
+           
             padding: 24px;
             box-sizing: border-box;
         }
@@ -201,6 +334,7 @@
         .floor-plan-image {
             width: 100%;
             height: auto;
+            
             border-radius: 16px;
             background: rgba(255, 255, 255, 0.98);
             padding: 12px;
@@ -252,7 +386,8 @@
             visibility: visible;
         }
 
-        #splash-screen {
+    
+       #splash-screen {
             position: fixed;
             top: 0;
             left: 0;
@@ -289,6 +424,7 @@
             z-index: 1;
         }
 
+        /* CONTAINER PRINCIPAL RESPONSIVO DA IMAGEM B2N E BOTÕES */
         .splash-content {
             display: flex;
             flex-direction: column;
@@ -324,7 +460,7 @@
 
         .buttons-container {
             position: absolute;
-            bottom: 25px;
+            bottom: 25px; /* Posiciona os botões abaixo da imagem */
             left: 0;
             right: 0;
             display: flex;
@@ -349,11 +485,14 @@
             position: relative;
             overflow: hidden;
             min-width: 120px;
+
         }
 
+        /* BOTÃO DESKTOP - Verde menor */
         .button-desktop {
             background: linear-gradient(135deg, #15844B, #15844B);
             color: #ffffff;
+            border: 2px solid #b8b5a8;
             border: none;
         }
 
@@ -365,9 +504,17 @@
             border-color: #4a882e;
         }
 
+        .button-desktop::before {
+            content: '';
+            margin-right: 6px;
+            font-size: 0.9em;
+        }
+
+        /* BOTÃO MOBILE - Mesmo estilo do desktop (sem azul) */
         .button-mobile {
             background: linear-gradient(135deg,#15844B, #15844B);
             color: #ffffff;
+            border: 2px solid #b8b5a8;
             border: none;
         }
 
@@ -379,7 +526,36 @@
             border-color: #4a882e;
         }
 
-        /* RESPONSIVIDADE */
+        .button-mobile::before {
+            content: '';
+            margin-right: 6px;
+            font-size: 0.9em;
+        }
+
+        .button-inicio:active {
+            transform: translateY(0px);
+        }
+
+        /* EFEITO DE ONDULAÇÃO MENOR */
+        .button-inicio::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .button-inicio:active::after {
+            width: 200px;
+            height: 200px;
+        }
+
+        /* RESPONSIVIDADE PARA TABLETS */
         @media (max-width: 1024px) and (min-width: 769px) {
             .image-b2n {
                 max-width: 700px;
@@ -401,6 +577,7 @@
             }
         }
 
+        /* RESPONSIVIDADE PARA MOBILE */
         @media (max-width: 768px) {
             .splash-content {
                 padding: 10px;
@@ -411,7 +588,7 @@
             .image-container {
                 max-width: 100%;
                 width: 100%;
-                margin-bottom: 70px;
+                margin-bottom: 70px; /* Espaço para os botões */
             }
             
             .image-b2n {
@@ -437,8 +614,14 @@
             .button-inicio:hover {
                 transform: translateY(-1px);
             }
+
+            .button-inicio::before {
+                font-size: 0.8em;
+                margin-right: 4px;
+            }
         }
 
+        /* RESPONSIVIDADE PARA MOBILE PEQUENO */
         @media (max-width: 480px) {
             .splash-content {
                 padding: 5px;
@@ -463,6 +646,39 @@
                 padding: 7px 12px;
                 font-size: 0.75rem;
                 min-width: 90px;
+            }
+
+            .button-inicio::before {
+                margin-right: 3px;
+                font-size: 0.75em;
+            }
+        }
+
+        /* RESPONSIVIDADE PARA TELAS MUITO PEQUENAS */
+        @media (max-width: 320px) {
+            .image-container {
+                margin-bottom: 55px;
+            }
+            
+            .image-b2n {
+                width: 100%;
+                border-radius: 8px;
+            }
+            
+            .button-inicio {
+                font-size: 0.7rem;
+                padding: 6px 10px;
+                min-width: 80px;
+            }
+            
+            .buttons-container {
+                bottom: 90px;
+                padding: 0 2%;
+            }
+
+            .button-inicio::before {
+                font-size: 0.7em;
+                margin-right: 2px;
             }
         }
 
@@ -521,16 +737,17 @@
             display: none;
         }
 
-        /* ============= SISTEMA VR COMPLETO ============= */
+        /* ============= NOVO SISTEMA VR ============= */
         
+        /* TELA DE SELEÇÃO VR - FUNDO TRANSPARENTE COM TOUR EM TEMPO REAL */
         .vr-selection-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.3); /* Apenas uma sombra leve */
+            backdrop-filter: blur(5px); /* Blur sutil para destacar o menu */
             z-index: 15000;
             display: none;
             flex-direction: column;
@@ -544,6 +761,7 @@
             opacity: 1;
         }
 
+        /* CONTAINER DO MENU VR COM BORDA E FUNDO SEMI-TRANSPARENTE */
         .vr-menu-container {
             background: linear-gradient(135deg, rgba(68, 68, 68, 0.85), rgba(75, 75, 75, 0.85));
             backdrop-filter: blur(20px);
@@ -558,6 +776,7 @@
             overflow: auto;
         }
 
+        /* LOGOS NO TOPO DO MENU VR */
         .vr-logos-container {
             display: flex;
             justify-content: center;
@@ -628,6 +847,13 @@
             background: linear-gradient(135deg, rgba(19, 19, 19, 0.25), rgba(255, 255, 255, 0.699));
         }
 
+        .vr-option-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            fill: #3b82f6;
+        }
+
         .vr-option-title {
             font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
             font-size: 30px;
@@ -637,7 +863,7 @@
             letter-spacing: -0.2px;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
             display: block;
-            align-items: center;
+  align-items: center;
         }
 
         .vr-option-description {
@@ -673,12 +899,13 @@
             border-color: rgba(255, 255, 255, 0.5);
         }
 
-        @media (max-width: 768px) {
-            .vr-menu-container {
-                max-height: 85vh;
-                overflow-y: scroll;
-                -webkit-overflow-scrolling: touch;
-            }
+        /* RESPONSIVIDADE PARA MOBILE */
+      @media (max-width: 768px) {
+    .vr-menu-container {
+        max-height: 85vh; /* ← AQUI: Altura menor no mobile */
+        overflow-y: scroll; /* ← AQUI: Forçar scroll no mobile */
+        -webkit-overflow-scrolling: touch; /* ← AQUI: Scroll suave no iOS */
+    }
 
             .vr-logos-container {
                 gap: 12px;
@@ -719,7 +946,7 @@
             }
         }
 
-        /* BOTÃO VR PRINCIPAL */
+        /* BOTÃO VR PRINCIPAL - VISÍVEL EM DESKTOP E MOBILE */
         .vr-button {
             position: fixed;
             bottom: 30px;
@@ -730,10 +957,11 @@
             border: none;
             border-radius: 20px;
             cursor: pointer;
-            display: flex;
+            display: flex; /* SEMPRE VISÍVEL */
             align-items: center;
             justify-content: center;
             z-index: 2500;
+            
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
@@ -750,7 +978,207 @@
             fill: #ffffff;
         }
 
-        /* NOTIFICAÇÃO VR - NORMAL E ERRO */
+        /* MODO VR LIVRE (SEM ÓCULOS) */
+        .gyro-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 12000;
+            display: none;
+        }
+
+        .gyro-mode.active {
+            display: block;
+        }
+
+        .gyro-viewer {
+            width: 100%;
+            height: 100%;
+        }
+
+      .gyro-controls {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    padding: 15px 25px;
+    z-index: 12001;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-width: 300px;
+    justify-content: space-between;
+}
+
+.gyro-logos {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.gyro-logo {
+    height: 35px;
+    width: auto;
+    opacity: 0.9;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+        .gyro-status {
+            color: #00ff00;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .gyro-exit {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            border-radius: 10px;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gyro-exit:hover {
+            background: rgba(239, 68, 68, 0.4);
+        }
+
+        /* MODO VR ESTEREOSCÓPICO (COM ÓCULOS) */
+        .stereo-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 13000;
+            display: none;
+            flex-direction: row;
+        }
+
+        .stereo-mode.active {
+            display: flex;
+        }
+
+        .stereo-eye {
+            width: 50%;
+            height: 100%;
+            position: relative;
+            background: #000;
+        }
+
+        .stereo-eye-left {
+            border-right: 2px solid #333;
+        }
+
+        .stereo-eye-right {
+            border-left: 2px solid #333;
+        }
+
+        .stereo-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* MIRA CENTRAL VR */
+        .vr-crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 15001;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .vr-crosshair.show {
+            opacity: 1;
+        }
+
+        .vr-crosshair::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        /* CONTROLES VR */
+        .vr-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 15001;
+            display: flex;
+            gap: 10px;
+        }
+
+        .vr-control-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .vr-control-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* PROGRESS BAR GAZE */
+        .vr-progress {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            z-index: 15001;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .vr-progress.show {
+            opacity: 1;
+        }
+
+        .vr-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00d4aa, #00a8ff);
+            border-radius: 4px;
+            transition: width 0.1s ease;
+        }
+
+        /* NOTIFICAÇÃO VR */
         .vr-notification {
             position: fixed;
             top: 50%;
@@ -765,224 +1193,40 @@
             z-index: 15002;
             opacity: 0;
             transition: opacity 0.3s ease;
-            max-width: 400px;
+            max-width: 300px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(15px);
         }
 
         .vr-notification.show {
             opacity: 1;
         }
 
-        /* NOTIFICAÇÃO DE ERRO - ESTILO ESPECIAL */
-        .vr-notification.error {
-            background: linear-gradient(135deg, rgba(220, 38, 38, 0.95), rgba(185, 28, 28, 0.95));
-            border: 2px solid rgba(255, 82, 82, 0.8);
-            max-width: 500px;
-            padding: 25px;
-            text-align: left;
-            box-shadow: 0 20px 60px rgba(220, 38, 38, 0.4);
-        }
-
-        .error-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-align: center;
-            color: #ffffff;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding-bottom: 10px;
-        }
-
-        .error-message {
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            color: rgba(255, 255, 255, 0.95);
-        }
-
-        .error-message strong {
-            color: #ffffff;
-            font-weight: 600;
-        }
-
-        .error-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .error-btn-close,
-        .error-btn-retry {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 100px;
-        }
-
-        .error-btn-close {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-        }
-
-        .error-btn-close:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-        }
-
-        .error-btn-retry {
-            background: linear-gradient(135deg, #059669, #047857);
-            color: white;
-            border: 1px solid #10b981;
-        }
-
-        .error-btn-retry:hover {
-            background: linear-gradient(135deg, #047857, #065f46);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-        }
-
-        /* RESPONSIVIDADE PARA NOTIFICAÇÕES DE ERRO */
+        /* MOBILE RESPONSIVO E HOTSPOTS OTIMIZADOS */
         @media (max-width: 768px) {
-            .vr-notification.error {
-                max-width: 95vw;
-                margin: 0 10px;
-                padding: 20px;
-            }
-
-            .error-title {
+            .interactive-hotspot {
+                width: 40px;
+                height: 40px;
                 font-size: 16px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+                /* Aumentar área de toque */
+                border: 5px solid #ffffff;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             }
-
-            .error-message {
-                font-size: 13px;
+            
+            .interactive-hotspot:hover,
+            .interactive-hotspot:active,
+            .interactive-hotspot:focus {
+                transform: scale(1.3);
+                background: #a0a0a0;
             }
-
-            .error-actions {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .error-btn-close,
-            .error-btn-retry {
-                width: 100%;
-                padding: 12px;
-            }
-        }
-
-        /* VR GAZE INDICATOR */
-        .vr-gaze-indicator {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            z-index: 15001;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-
-        .vr-gaze-indicator.show {
-            opacity: 1;
-        }
-
-        .vr-gaze-indicator::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 8px;
-            height: 8px;
-            background: #fff;
-            border-radius: 50%;
-        }
-
-        /* PROGRESS BAR PARA GAZE */
-        .vr-gaze-progress {
-            position: fixed;
-            top: 55%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            z-index: 15001;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .vr-gaze-progress.show {
-            opacity: 1;
-        }
-
-        .vr-gaze-progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #00d4aa, #00a8ff);
-            border-radius: 4px;
-            transition: width 0.1s ease;
-        }
-
-        .room-info {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            padding: 20px;
-            max-width: 300px;
-            z-index: 1000;
-        }
-
-        .room-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #ffffff;
-            margin-bottom: 5px;
-        }
-
-        .room-description {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.4;
-        }
-
-        #submarca-tour {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            max-width: 100px;
-            width: 10%;
-            height: auto;
-            opacity: 0.7;
-            z-index: 2000;
-            pointer-events: none;
-            filter: drop-shadow(0px 0px 10px rgba(0, 0, 0, 0.4));
-        }
-
-        @media (max-width: 768px) {
-            .vr-button {
-                bottom: 20px;
-                right: 20px;
-                width: 65px;
-                height: 65px;
+            
+            #interactive-info-panel {
+                right: 10px;
+                top: 80px;
+                max-width: calc(100vw - 40px);
+                left: 10px;
+                right: 10px;
             }
             
             .room-info {
@@ -992,16 +1236,433 @@
                 max-width: none;
             }
             
+            .vr-button {
+                bottom: 20px;
+                right: 20px;
+                width: 65px;
+                height: 65px;
+            }
+            
+            .vr-options {
+                gap: 15px;
+                max-width: calc(100vw - 40px);
+                padding: 0 20px;
+            }
+            
+            .vr-option {
+                padding: 20px;
+            }
+            
+            .vr-selection-title {
+                font-size: 24px;
+                padding: 0 20px;
+            }
+            
+            .vr-selection-subtitle {
+                font-size: 15px;
+                padding: 0 20px;
+            }
+            
+            .vr-close-btn {
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+            
+            .gyro-controls {
+                padding: 10px 15px;
+                top: 15px;
+            }
+            
+            .vr-progress {
+                width: 150px;
+                bottom: 30px;
+            }
+            
+            .floor-plan-toggle {
+                width: 55px;
+                height: 55px;
+                top: 15px;
+                left: 15px;
+            }
+            
+            .floor-plan-menu {
+                top: 75px;
+                left: 15px;
+                right: 15px;
+                width: auto;
+                max-height: calc(100vh - 100px);
+            }
+            
+            .hotspot-tooltip {
+                max-width: 180px;
+                font-size: 13px;
+                padding: 10px 14px;
+            }
+
+            /* LOGO RESPONSIVO MOBILE */
+            #logo-container {
+                top: 30px;
+            }
+            
+            #logo-central {
+                width: 60px;
+                height: 50px;
+            }
+        }
+
+        /* TABLET RESPONSIVO */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .interactive-hotspot {
+                width: 35px;
+                height: 35px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .vr-button {
+                width: 65px;
+                height: 65px;
+                bottom: 25px;
+                right: 25px;
+            }
+            
+            .floor-plan-menu {
+                width: 350px;
+            }
+        }
+
+        /* MELHORIAS PARA TOUCH */
+        @media (pointer: coarse) {
+            .interactive-hotspot {
+                /* Área de toque maior para dedos */
+                min-width: 44px;
+                min-height: 44px;
+                /* Feedback visual melhor */
+                transition: all 0.2s ease;
+            }
+            
+            .interactive-hotspot:active {
+                transform: scale(1.2);
+                background: #007bff;
+            }
+            
+            /* Remover hover effects em touch */
+            .interactive-hotspot:hover {
+                transform: none;
+                background: rgba(128, 128, 128, 0.9);
+            }
+            
+            .plan-hotspot {
+                min-width: 10px;
+                min-height: 10px;
+            }
+            
+            .floor-plan-toggle,
+            .vr-button,
+            .close-menu-btn {
+                /* Área de toque adequada */
+                min-width: 44px;
+                min-height: 44px;
+            }
+        }
+
+        #submarca-tour {
+            position: fixed;
+            bottom: 20px; /* Distância da parte inferior */
+            left: 20px; /* Distância da parte esquerda */
+            max-width: 100px; /* Tamanho máximo para telas maiores */
+            width: 10%; /* Largura responsiva */
+            height: auto;
+            opacity: 0.7; /* Transparência */
+            z-index: 2000; /* Garante que fique acima do tour, mas não sobreponha elementos críticos */
+            pointer-events: none; /* Não interativo */
+            filter: drop-shadow(0px 0px 10px rgba(0, 0, 0, 0.4)); /* Sombra sutil */
+        }
+
+        /* MOBILE RESPONSIVO E HOTSPOTS OTIMIZADOS */
+        @media (max-width: 768px) {
+            /* ... outros estilos responsivos ... */
             #submarca-tour {
                 bottom: 15px;
                 left: 15px;
-                max-width: 120px;
+                max-width: 120px; /* Menor em telas pequenas */
                 width: 20%;
             }
         }
+
+        /* TABLET RESPONSIVO */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            /* ... outros estilos responsivos ... */
+            #submarca-tour {
+                max-width: 150px;
+            }
+        }
+
+        /* SETINHA/MIRA CENTRAL PARA NAVEGAÇÃO */
+.crosshair-pointer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0.9;
+    transition: all 0.2s ease;
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.5));
+    display: none; /* INICIAR ESCONDIDA */
+}
+
+
+/* GARANTIR VISIBILIDADE DA MIRA NO VR QUEST 2 */
+body.vr-quest-mode .crosshair-pointer {
+    display: block !important;
+    opacity: 1 !important;
+    z-index: 25000 !important;
+    position: fixed !important;
+    pointer-events: none !important;
+}
+
+.vr-mode .crosshair-pointer {
+    display: block !important;
+    opacity: 1 !important;
+    z-index: 25000 !important;
+}
+.crosshair-arrow {
+    width: 100%;
+    height: 100%;
+    fill: #ffffff;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+/* ANIMAÇÃO QUANDO MIRA NO HOTSPOT */
+.crosshair-pointer.targeting {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.6));
+}
+
+.crosshair-arrow.targeting circle {
+    stroke: #00ff88;
+    fill: #00ff88;
+    animation: pulse-circle 0.6s infinite;
+}
+
+@keyframes pulse-circle {
+    0%, 100% { 
+        opacity: 0.8; 
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 1; 
+        transform: scale(1.1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
+/* BARRA DE PROGRESSO DA MIRA */
+.crosshair-progress {
+    position: fixed;
+    top: calc(50% + 30px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.crosshair-progress.show {
+    opacity: 1;
+}
+
+.crosshair-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #e7e5e5, #4e4e4d, #070707);
+    border-radius: 3px;
+    transition: width 0.1s ease;
+}
+
+/* TOOLTIP DA MIRA */
+.crosshair-tooltip {
+    position: fixed;
+    top: calc(50% - 60px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+}
+
+.crosshair-tooltip.show {
+    opacity: 1;
+}
+
+/* RESPONSIVO MOBILE */
+@media (max-width: 768px) {
+    .crosshair-pointer {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .crosshair-progress {
+        width: 100px;
+        top: calc(50% + 40px);
+    }
+    
+    .crosshair-tooltip {
+        top: calc(50% - 70px);
+        font-size: 16px;
+    }
+}
+
+
+/* FORÇAR MIRA NO MODO GYRO */
+.gyro-mode .crosshair-pointer {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 25000 !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    pointer-events: none !important;
+}
+
+.gyro-mode .crosshair-progress {
+    display: block !important;
+    z-index: 25000 !important;
+}
+
+.gyro-mode .crosshair-tooltip {
+    display: block !important;
+    z-index: 25000 !important;
+}
+
+/* GARANTIR QUE A MIRA APAREÇA EM QUALQUER SITUAÇÃO */
+body.gyro-active .crosshair-pointer {
+    display: block !important;
+    opacity: 1 !important;
+}
+
+
+/* ✅ FORÇAR MIRA NO MODO GYRO - MAIS AGRESSIVO */
+.gyro-mode .crosshair-pointer,
+body.gyro-active .crosshair-pointer {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 25000 !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    pointer-events: none !important;
+    width: 40px !important;
+    height: 40px !important;
+}
+
+/* GARANTIR QUE FUNCIONE EM QUALQUER SITUAÇÃO */
+body.gyro-active .crosshair-pointer {
+    display: block !important;
+    opacity: 1 !important;
+}
+
+/* MOBILE ESPECÍFICO */
+@media (max-width: 768px) {
+    .gyro-mode .crosshair-pointer,
+    body.gyro-active .crosshair-pointer {
+        width: 50px !important;
+        height: 50px !important;
+        z-index: 30000 !important;
+    }
+}
+
+
+/* FORÇAR MIRA NO MODO QUEST 2 */
+body.vr-quest-mode .crosshair-pointer,
+.stereo-mode .crosshair-pointer {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 30000 !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    pointer-events: none !important;
+}
+
+/* GARANTIR ELEMENTOS AUXILIARES */
+body.vr-quest-mode .crosshair-progress,
+body.vr-quest-mode .crosshair-tooltip {
+    display: block !important;
+    z-index: 30000 !important;
+}
+
+
+@media (max-width: 768px) {
+    .gyro-controls {
+        min-width: 250px;
+        padding: 12px 20px;
+        gap: 15px;
+    }
+    
+    .gyro-logo {
+        height: 30px;
+    }
+    
+    .gyro-exit {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}
+
     </style>
 </head>
 <body>
+
+    <!-- SETINHA/MIRA CENTRAL -->
+<div class="crosshair-pointer" id="crosshairPointer">
+    <svg class="crosshair-arrow" id="crosshairArrow" viewBox="0 0 24 24">
+        <!-- Bolinha externa -->
+        <circle cx="12" cy="12" r="8" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.8"/>
+        <!-- Bolinha central -->
+        <circle cx="12" cy="12" r="3" fill="#ffffff" opacity="0.9"/>
+        <!-- Ponto central -->
+        <circle cx="12" cy="12" r="1" fill="#ffffff" opacity="1"/>
+    </svg>
+</div>
+
+<!-- BARRA DE PROGRESSO -->
+<div class="crosshair-progress" id="crosshairProgress">
+    <div class="crosshair-progress-bar" id="crosshairProgressBar"></div>
+</div>
+
+<!-- TOOLTIP -->
+<div class="crosshair-tooltip" id="crosshairTooltip">Aponte para navegar</div>
 
     <img id="submarca-tour" src="submarcatour.png" alt="Submarca">
 
@@ -1018,14 +1679,14 @@
     <!-- Menu da planta baixa -->
     <div class="floor-plan-menu" id="floorPlanMenu">
         <div class="menu-header">
-            <div class="menu-title">📍 Planta</div>
+            <div class="menu-title"> Planta</div>
             <button class="close-menu-btn" id="closeMenuBtn">×</button>
         </div>
 
         <div class="floor-plan-container">
             <img src="planta1.png" alt="Planta Baixa" class="floor-plan-image" id="floorPlanImage">
             
-            <!-- Hotspots da planta -->
+            <!-- Hotspots da planta - INCLUINDO HOME (H) -->
             <div class="plan-hotspot" data-room="0" style="top: 71%; left: 22%;"></div>
             <div class="plan-hotspot" data-room="1" style="top: 5%; left: 30%;"></div>
             <div class="plan-hotspot" data-room="2" style="top: 9%; left: 17%;"></div>
@@ -1048,13 +1709,13 @@
     </div>
 
     <!-- BOTÃO VR PRINCIPAL -->
-    <div class="vr-button" id="vrButton" title="Modo VR">
+    <div class="vr-button" id="vrButton" title="Modo VR" onclick="console.log('BOTÃO VR CLICADO DIRETAMENTE!'); forceVRButtonWork();">
         <svg class="vr-icon" viewBox="0 0 24 24">
             <path d="M20.84,4.22C20.5,4.08 20.15,4 19.8,4H4.2C3.85,4 3.5,4.08 3.16,4.22C2.44,4.53 2,5.25 2,6V18C2,18.75 2.44,19.47 3.16,19.78C3.5,19.92 3.85,20 4.2,20H19.8C20.15,20 20.5,19.92 20.84,19.78C21.56,19.47 22,18.75 22,18V6C22,5.25 21.56,4.53 20.84,4.22M12,6.5C13.38,6.5 14.5,7.62 14.5,9C14.5,10.38 13.38,11.5 12,11.5C10.62,11.5 9.5,10.38 9.5,9C9.5,7.62 10.62,6.5 12,6.5M7,6.5C8.38,6.5 9.5,7.62 9.5,9C9.5,10.38 8.38,11.5 7,11.5C5.62,11.5 4.5,10.38 4.5,9C4.5,7.62 5.62,6.5 7,6.5M17,6.5C18.38,6.5 19.5,7.62 19.5,9C19.5,10.38 18.38,11.5 17,11.5C15.62,11.5 14.5,10.38 14.5,9C14.5,7.62 15.62,6.5 17,6.5Z"/>
         </svg>
     </div>
 
-    <!-- TELA DE SELEÇÃO VR -->
+    <!-- TELA DE SELEÇÃO VR COM FUNDO TRANSPARENTE -->
     <div class="vr-selection-screen" id="vrSelectionScreen">
         <div class="vr-menu-container">
             <button class="vr-close-btn" id="vrCloseBtn">×</button>
@@ -1065,7 +1726,7 @@
                 <img src="./logoprincipal2.png" alt="" class="vr-logo">
             </div>
             
-            <h1 class="vr-selection-title">🥽 Virtual Reality</h1>
+            <h1 class="vr-selection-title"> Virtual Reality</h1>
             <p class="vr-selection-subtitle">
                 Escolha como deseja visualizar o tour virtual 360°.<br>
                 Ambos os modos utilizam os sensores de movimento do seu dispositivo.
@@ -1073,7 +1734,10 @@
             
             <div class="vr-options">
                 <div class="vr-option" id="gyroModeBtn">
-                    <div class="vr-option-title">📱 Visualização Livre</div>
+                    <svg class="vr-option-icon" viewBox="0 0 24 24">
+                       
+                    </svg>
+                    <div class="vr-option-title"> Visualização Livre</div>
                     <div class="vr-option-description">
                         Movimente o celular no espaço para explorar.<br>
                         Ideal para visualização rápida sem acessórios.
@@ -1081,26 +1745,59 @@
                 </div>
                 
                 <div class="vr-option" id="questModeBtn">
-                    <div class="vr-option-title">🥽 Oculus Quest 2</div>
+                    <svg class="vr-option-icon" viewBox="0 0 24 24">
+                       
+                    </svg>
+                    <div class="vr-option-title"> Oculos Quest 2</div>
                     <div class="vr-option-description">
-                        Tour otimizado para Oculus Quest 2.<br>
-                        Navegação automática olhando para hotspots por 2 segundos.
+                        Tour otimizado para Oculos Quest 2.<br>
+                        Movimentação com controles e rastreamento de cabeça nativo.
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- MODO VR LIVRE (GIROSCÓPIO) -->
+<div class="gyro-mode" id="gyroMode">
+    <div class="gyro-controls">
+        <div class="gyro-logos">
+            <img src="./submarcatour.png" alt="Logo Principal" class="gyro-logo">
+            <img src="./logoprincipal2.png" alt="Logo Secundário" class="gyro-logo">
+        </div>
+        <div class="gyro-status" id="gyroStatus">📱 Gire o celular para navegar</div>
+        <button class="gyro-exit" id="gyroExitBtn">✕ Sair VR</button>
+    </div>
+    <div class="gyro-viewer" id="gyroViewer"></div>
+</div>
+
+    <!-- MODO VR ESTEREOSCÓPICO -->
+    <div class="stereo-mode" id="stereoMode">
+        <!-- Controles VR -->
+        <div class="vr-controls">
+            <div class="vr-control-btn" id="stereoExitBtn" title="Sair VR">×</div>
+        </div>
+        
+        <!-- Olho esquerdo -->
+        <div class="stereo-eye stereo-eye-left">
+            <canvas class="stereo-canvas" id="stereoCanvasLeft"></canvas>
+            <div class="vr-crosshair" id="stereoCrosshairLeft"></div>
+        </div>
+        
+        <!-- Olho direito -->
+        <div class="stereo-eye stereo-eye-right">
+            <canvas class="stereo-canvas" id="stereoCanvasRight"></canvas>
+            <div class="vr-crosshair" id="stereoCrosshairRight"></div>
+        </div>
+        
+        <!-- Progress bar para gaze -->
+        <div class="vr-progress" id="stereoProgress">
+            <div class="vr-progress-bar" id="stereoProgressBar"></div>
+        </div>
+    </div>
+
     <!-- NOTIFICAÇÃO VR -->
     <div class="vr-notification" id="vrNotification"></div>
-
-    <!-- INDICADOR DE OLHAR VR -->
-    <div class="vr-gaze-indicator" id="vrGazeIndicator"></div>
-
-    <!-- BARRA DE PROGRESSO VR GAZE -->
-    <div class="vr-gaze-progress" id="vrGazeProgress">
-        <div class="vr-gaze-progress-bar" id="vrGazeProgressBar"></div>
-    </div>
 
     <div id="logo-container">
         <img src="./logoprincipal.png" alt="Logo b2n Engenharia" id="logo-central">
@@ -1112,8 +1809,8 @@
             <div class="image-container">
                 <img class="image-b2n" src="./b2n.png" alt="B2N Engenharia">
                 <div class="buttons-container">
-                    <button class="button-inicio button-desktop" id="start-desktop-btn">🖥️ DESKTOP</button>
-                    <button class="button-inicio button-mobile" id="start-mobile-btn">📱 MOBILE</button>
+                    <button class="button-inicio button-desktop" id="start-desktop-btn">INICIAR</button>
+                    <button class="button-inicio button-mobile" id="start-mobile-btn">INICIAR</button>
                 </div>
             </div>
         </div>
@@ -1127,6 +1824,11 @@
         
         <div id="viewer"></div>
         
+        <div id="interactive-info-panel">
+            <div class="interactive-info-title">Título</div>
+            <div class="interactive-info-content">Descrição</div>
+        </div>
+        
         <div class="room-info">
             <div class="room-title">Carregando...</div>
             <div class="room-description">Aguarde...</div>
@@ -1134,14 +1836,14 @@
     </div>
 
     <script>
-        console.log("🚀 Iniciando Tour Virtual 360° com Oculus Quest 2 funcional...");
+        console.log("🚀 Iniciando sistema VR aprimorado - VR funcionando em DESKTOP E MOBILE...");
 
         if (typeof THREE === 'undefined') {
             console.error('❌ THREE.js não carregou!');
             alert('Erro: THREE.js não foi carregado.');
         }
 
-        // ============= SISTEMA DE HOTSPOTS COM GAZE ============= 
+        // ============= SISTEMA DE HOTSPOTS ============= 
         class InteractiveHotspotSystem {
             constructor(scene, camera, renderer) {
                 this.scene = scene;
@@ -1149,113 +1851,30 @@
                 this.renderer = renderer;
                 this.hotspots = [];
                 this.hotspotsData = this.getHotspotsData();
-                console.log("✅ Sistema de hotspots inicializado com navegação por olhar");
+                console.log("✅ Sistema de hotspots inicializado (HOME sem hotspots interativos)");
             }
             
-            getHotspotsData() {
+           getHotspotsData() {
                 return {
+                    // HOME (índice 0) - SEM HOTSPOTS por enquanto
                     0: [{ x: 3.41, y: 0.45, target: 9, label: 'Sala 3' }],
                     1: [{ x: 3.10, y: 0.45, target: 2, label: 'Exterior 2' }],
-                    2: [{ x: 0.09, y: 0.48, target: 3, label: 'Exterior 3' }],
-                    3: [ 
-                        { x: 0.24, y: 0.48, target: 14, label: 'Banheiro Sauna' }, 
-                        { x: 0.08, y: 0.48, target: 5, label: 'Exterior 5' },
-                        { x: 0.63, y: 0.49, target: 1, label: 'Exterior 1' }, 
-                        { x: 0.50, y: 0.45, target: 2, label: 'Exterior 2' }, 
-                        { x: 0.15, y: 0.45, target: 4, label: 'Exterior 4' }
-                    ],
-                    4: [
-                        { x: 0.65, y: 0.50, target: 1, label: 'Exterior 1' }, 
-                        { x: 0.61, y: 0.50, target: 2, label: 'Exterior 2' }, 
-                        { x: 0.65, y: 0.44, target: 3, label: 'Exterior 3' }, 
-                        { x: 0.9, y: 0.5, target: 5, label: 'Exterior 5' },
-                        { x: 0.15, y: 0.44, target: 6, label: 'Exterior 6' }, 
-                        { x: 0.10, y: 0.5, target: 7, label: 'Sala 1' }, 
-                        { x: 0.40, y: 0.5, target: 14, label: 'Banheiro Sauna' }
-                    ],
-                    5: [
-                        { x: 0.62, y: 0.50, target: 1, label: 'Exterior 1' }, 
-                        { x: 0.57, y: 0.50, target: 2, label: 'Exterior 2' }, 
-                        { x: 0.59, y: 0.47, target: 3, label: 'Exterior 3' }, 
-                        { x: 0.40, y: 0.42, target: 4, label: 'Exterior 4' }, 
-                        { x: 0.23, y: 0.45, target: 6, label: 'Exterior 6' }, 
-                        { x: 0.15, y: 0.5, target: 7, label: 'Sala 1' }, 
-                        { x: 0.40, y: 0.48, target: 14, label: 'Banheiro Sauna' }
-                    ],
-                    6: [
-                        { x: 0.10, y: 0.45, target: 7, label: 'Sala 1' }, 
-                        { x: 0.65, y: 0.50, target: 1, label: 'Exterior 1' }, 
-                        { x: 0.63, y: 0.47, target: 2, label: 'Exterior 2' }, 
-                        { x: 0.65, y: 0.47, target: 3, label: 'Exterior 3' }, 
-                        { x: 0.65, y: 0.40, target: 4, label: 'Exterior 4' }, 
-                        { x: 0.82, y: 0.48, target: 5, label: 'Exterior 5' }, 
-                        { x: 0.51, y: 0.48, target: 14, label: 'Banheiro Sauna' }
-                    ],
-                    7: [
-                        { x: 0.93, y: 0.50, target: 0, label: 'Home' },
-                        { x: 0.08, y: 0.48, target: 8, label: 'Sala 2' }, 
-                        { x: 0.92, y: 0.45, target: 9, label: 'Sala 3' }, 
-                        { x: 0.82, y: 0.50, target: 10, label: 'Cozinha' }, 
-                        { x: 0.84, y: 0.50, target: 16, label: 'Lavanderia'}, 
-                        { x: 0.90, y: 0.50, target: 17, label: 'Lavabo' }, 
-                        { x: 0.87, y: 0.54, target: 12, label: 'Suite 2' }, 
-                        { x: 0.87, y: 0.51, target: 11, label: 'Suite 1' }, 
-                        { x: 0.35, y: 0.49, target: 1, label: 'Exterior 1' }, 
-                        { x: 0.32, y: 0.50, target: 2, label: 'Exterior 2' }, 
-                        { x: 0.37, y: 0.47, target: 3, label: 'Exterior 3' }, 
-                        { x: 0.37, y: 0.42, target: 4, label: 'Exterior 4' }, 
-                        { x: 0.48, y: 0.48, target: 5, label: 'Exterior 5' }, 
-                        { x: 0.40, y: 0.30, target: 6, label: 'Exterior 6' }, 
-                        { x: 0.27, y: 0.47, target: 14, label: 'Banheiro Sauna' }
-                    ],
-                    8: [
-                        { x: 0.11, y: 0.49, target: 0, label: 'Home' },
-                        { x: 0.84, y: 0.45, target: 7, label: 'Sala 1' }, 
-                        { x: 0.06, y: 0.45, target: 9, label: 'Sala 3' }, 
-                        { x: 0.01, y: 0.49, target: 10, label: 'Cozinha' }, 
-                        { x: 0.06, y: 0.49, target: 17, label: 'Lavabo' }, 
-                        { x: 0.04, y: 0.50, target: 12, label: 'Suite 2' }, 
-                        {x: 0.04, y: 0.48, target: 11, label: 'Suite 1' }, 
-                        { x: 0.75, y: 0.50, target: 6, label: 'Exterior 6' }
-                    ],
-                    9: [
-                        { x: 3.27, y: 0.48, target: 0, label: 'Home' }, 
-                        { x: 0.65, y: 0.45, target: 7, label: 'Sala 1' }, 
-                        { x: 0.50, y: 0.52, target: 8, label: 'Sala 2' }, 
-                        {x: 0.02, y: 0.49, target: 10, label: 'Cozinha' }, 
-                        { x: 0.07, y: 0.49, target: 16, label: 'Lavanderia' }, 
-                        { x: 0.18, y: 0.49, target: 17, label: 'Lavabo' }, 
-                        { x: 0.12, y: 0.55, target: 12, label: 'Suite 2' }, 
-                        { x: 0.12, y: 0.49, target: 11, label: 'Suite 1' },  
-                        { x: 0.60, y: 0.50, target: 6, label: 'Exterior 6' }
-                    ],
-                    10: [
-                        { x: 0.55, y: 0.49, target: 7, label: 'Sala 1' },
-                        { x: 0.34, y: 0.49, target: 0, label: 'Home' }, 
-                        { x: 0.50, y: 0.49, target: 8, label: 'Sala 2' }, 
-                        { x: 0.45, y: 0.44, target: 9, label: 'Sala 3' }, 
-                        { x: 0.13, y: 0.49, target: 16, label: 'Lavanderia' }, 
-                        { x: 0.32, y: 0.49, target: 17, label: 'Lavabo' }, 
-                        { x: 0.28, y: 0.45, target: 12, label: 'Suite 2' }, 
-                        { x: 0.30, y: 0.40, target: 11, label: 'Suite 1' }
-                    ],
-                    11: [
-                        { x: 0.72, y: 0.44, target: 9, label: 'Sala 3' }, 
-                        { x: 0.63, y: 0.43, target: 12, label: 'Suite 2' }
-                    ],
-                    12: [
-                        { x: 0.45, y: 0.48, target: 11, label: 'Suite 1' }, 
-                        { x: 0.43, y: 0.48, target: 9, label: 'Sala 3' },
-                        { x: 0.63, y: 0.36, target: 13, label: 'Banheiro Suite 2' }
-                    ],
-                    13: [{ x: 0.65, y: 0.40, target: 12, label: 'Suite 2'}],
-                    14: [{ x: 0.55, y: 0.28, target: 4, label: 'Exterior 4' }],
+                    2: [{ x: 0.75, y: 0.48, target: 1, label: 'Exterior 1' },{ x: 0.09, y: 0.48, target: 3, label: 'Exterior 3' }],
+                3: [ { x: 0.24,y: 0.48, target: 14, label: 'Banheiro Sauna' }, { x: 0.08,y: 0.48, target: 5, label: 'Exterior 5' },{ x: 0.63, y: 0.49, target: 1, label: 'Exterior 1' }, { x: 0.50, y: 0.45, target: 2, label: 'Exterior 2' }, { x: 0.15, y: 0.45, target: 4, label: 'Exterior 4' }],
+                    4: [{ x: 0.65, y: 0.50, target: 1, label: 'Exterior 1' }, { x: 0.61, y: 0.50, target: 2, label: 'Exterior 2' }, { x: 0.65, y: 0.44, target: 3, label: 'Exterior 3' }, { x: 0.9, y: 0.5, target: 5, label: 'Exterior 5' },{ x: 0.15, y: 0.44, target: 6, label: 'Exterior 6' }, { x: 0.10, y: 0.5, target: 7, label: 'Sala 1' }, { x: 0.40, y: 0.5, target: 14, label: 'Banheiro Sauna' }],
+                    5: [{  x: 0.62, y: 0.50, target: 1, label: 'Exterior 1' }, {  x: 0.57, y: 0.50, target: 2, label: 'Exterior 2' }, {  x: 0.59, y: 0.47, target: 3, label: 'Exterior 3' }, {  x: 0.40, y: 0.42, target: 4, label: 'Exterior 4' }, {  x: 0.23, y: 0.45,target: 6, label: 'Exterior 6' }, { x: 0.15, y: 0.5, target: 7, label: 'Sala 1' }, { x: 0.40, y: 0.48, target: 14, label: 'Banheiro Sauna' }],
+                    6: [{ x: 0.10, y: 0.45, target: 7, label: 'Sala 1' }, { x: 0.65, y: 0.50, target: 1, label: 'Exterior 1' }, { x: 0.63, y: 0.47, target: 2, label: 'Exterior 2' }, { x: 0.65, y: 0.47, target: 3, label: 'Exterior 3' }, { x: 0.65, y: 0.40, target: 4, label: 'Exterior 4' }, { x: 0.82, y: 0.48, target: 5, label: 'Exterior 5' }, { x: 0.51, y: 0.48, target: 14, label: 'Banheiro Sauna' }],
+        /*sala1*/   7: [{ x: 0.93, y: 0.50, target: 0, label: 'Home' },{ x: 0.08, y: 0.48, target: 8, label: 'Sala 2' }, { x: 0.92, y: 0.45, target: 9, label: 'Sala 3' }, { x: 0.82, y: 0.50, target: 10, label: 'Cozinha' }, { x: 0.84, y: 0.50, target: 16, label: 'Lavanderia'}, { x: 0.90, y: 0.50, target: 17, label: 'Lavabo' }, { x: 0.87, y: 0.54, target: 12, label: 'Suite 2' }, { x: 0.87, y: 0.51, target: 11, label: 'Suite 1' }, { x: 0.35, y: 0.49, target: 1, label: 'Exterior 1' }, { x: 0.32, y: 0.50, target: 2, label: 'Exterior 2' }, { x: 0.37, y: 0.47, target: 3, label: 'Exterior 3' }, { x: 0.37, y: 0.42, target: 4, label: 'Exterior 4' }, { x: 0.48, y: 0.48, target: 5, label: 'Exterior 5' }, { x: 0.40, y: 0.30, target: 6, label: 'Exterior 6' }, { x: 0.27, y: 0.47, target: 14, label: 'Banheiro Sauna' }],
+        /*sala2*/   8: [{ x: 0.11, y: 0.49, target: 0, label: 'Home' },{ x: 0.84, y: 0.45, target: 7, label: 'Sala 1' }, { x: 0.06, y: 0.45, target: 9, label: 'Sala 3' }, { x: 0.01, y: 0.49, target: 10, label: 'Cozinha' }, { x: 0.06, y: 0.49, target: 17, label: 'Lavabo' }, { x: 0.04, y: 0.50, target: 12, label: 'Suite 2' }, {x: 0.04, y: 0.48, target: 11, label: 'Suite 1' }, { x: 0.75, y: 0.50, target: 6, label: 'Exterior 6' }],
+        /*sala3*/   9: [{ x: 3.27, y: 0.48, target: 0, label: 'Home' }, { x: 0.65, y: 0.45, target: 7, label: 'Sala 1' }, { x: 0.50, y: 0.52, target: 8, label: 'Sala 2' }, {x: 0.02, y: 0.49, target: 10, label: 'Cozinha' }, { x: 0.07, y: 0.49, target: 16, label: 'Lavanderia' }, { x: 0.18, y: 0.49, target: 17, label: 'Lavabo' }, { x: 0.12, y: 0.55, target: 12, label: 'Suite 2' }, { x: 0.12, y: 0.49, target: 11, label: 'Suite 1' },  { x: 0.60, y: 0.50, target: 6, label: 'Exterior 6' }],
                     15: [{ x: 0.55, y: 0.50, target: 16, label: 'Lavanderia' }],
-                    16: [ 
-                        { x: 0.20, y: 0.50, target: 15, label: 'Despensa' }, 
-                        { x: 0.59, y: 0.50, target: 10, label: 'Cozinha'}
-                    ],
-                    17: [{ x: 0.55, y: 0.40, target: 9, label: 'Sala 3' }]
+                    16: [ { x: 0.20, y: 0.50, target: 15, label: 'Despensa' }, { x: 0.59, y: 0.50, target: 10, label: 'Cozinha'}],
+       /*cozinha*/  10: [{ x: 0.55, y: 0.49, target: 7, label: 'Sala 1' },{ x: 0.34, y: 0.49, target: 0, label: 'Home' }, { x: 0.50, y: 0.49, target: 8, label: 'Sala 2' }, { x: 0.45, y: 0.44, target: 9, label: 'Sala 3' }, { x: 0.13, y: 0.49, target: 16, label: 'Lavanderia' }, { x: 0.32, y: 0.49, target: 17, label: 'Lavabo' }, { x: 0.28, y: 0.45, target: 12, label: 'Suite 2' }, { x: 0.30, y: 0.40, target: 11, label: 'Suite 1' }],
+                    14: [{ x: 0.55, y: 0.28, target: 4, label: 'Exterior 4' }],
+                    17: [{ x: 0.55, y: 0.40, target: 9, label: 'Sala 3' }],
+    /*suite1*/      11: [{ x: 0.72, y: 0.44, target: 9, label: 'Sala 3' }, { x: 0.63, y: 0.43, target: 12, label: 'Suite 2' }],
+                    12: [{ x: 0.45, y: 0.48, target: 11, label: 'Suite 1' }, { x: 0.43, y: 0.48, target: 9, label: 'Sala 3' },{ x: 0.63, y: 0.36, target: 13, label: 'Banheiro Suite 2' }],
+                    13: [{ x: 0.65, y: 0.40, target: 12, label: 'Suite 2'}],
                 };
             }
         
@@ -1264,17 +1883,17 @@
                 
                 const roomHotspots = this.hotspotsData[roomIndex];
                 if (!roomHotspots || roomHotspots.length === 0) {
-                    console.log(`❌ Nenhum hotspot para cômodo ${roomIndex}`);
+                    console.log(`❌ Nenhum hotspot para cômodo ${roomIndex} (${rooms[roomIndex]?.name || 'Desconhecido'})`);
                     return;
                 }
                 
-                console.log(`✅ Criando ${roomHotspots.length} hotspots 3D para cômodo ${roomIndex}`);
+                console.log(`✅ Criando ${roomHotspots.length} hotspots 3D fixos para cômodo ${roomIndex} (${rooms[roomIndex]?.name})`);
                 
                 roomHotspots.forEach((data, index) => {
                     this.createSingleHotspot(data, index);
                 });
                 
-                console.log(`✅ ${roomHotspots.length} hotspots 3D criados!`);
+                console.log(`✅ ${roomHotspots.length} hotspots 3D fixos criados!`);
             }
             
             createSingleHotspot(data, index) {
@@ -1292,8 +1911,9 @@
                 const z = radius * Math.sin(theta) * Math.sin(phi);
                 
                 try {
+                    // HOTSPOT MENOR E MAIS PRECISO
                     const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
-                    const hotspotSize = isMobile ? 13 : 8;
+                    const hotspotSize = isMobile ? 13 : 8; // 15 no mobile, 8 no desktop
                     const geometry = new THREE.SphereGeometry(hotspotSize, 8, 8);
                     const material = new THREE.MeshBasicMaterial({ 
                         color: 0x808080,
@@ -1305,18 +1925,19 @@
                     marker.userData = { hotspotData: data, hotspotIndex: index };
                     this.scene.add(marker);
                     
-                    const ringSize = isMobile ? 14 : 9;
+                    // ANEL MENOR E MAIS SUTIL
+                    const ringSize = isMobile ? 14 : 9; // 20 no mobile, 9 no desktop
                     const ringGeometry = new THREE.RingGeometry(hotspotSize - 2, ringSize, 12);
                     const ringMaterial = new THREE.MeshBasicMaterial({ 
                         color: 0xffffff,
                         transparent: true,
-                        opacity: 0.7,
+                        opacity: 0.7, // Reduzida opacidade
                         side: THREE.DoubleSide
                     });
                     const ring = new THREE.Mesh(ringGeometry, ringMaterial);
                     ring.position.set(x, y, z);
                     ring.lookAt(0, 0, 0);
-                    ring.userData = { hotspotData: data, hotspotIndex: index };
+                    ring.userData = { hotspotData: data, hotspotIndex: index }; // Adicionar userData no ring também
                     this.scene.add(ring);
                     
                     this.hotspots.push({
@@ -1326,10 +1947,15 @@
                         position3D: new THREE.Vector3(x, y, z)
                     });
                     
-                    console.log(`✅ Hotspot 3D criado: ${data.label}`);
+                    console.log(`✅ Hotspot 3D menor criado: ${data.label}`);
                 } catch (error) {
                     console.error('Erro ao criar hotspot:', error);
                 }
+            }
+            
+            updatePositions() {
+                // Não precisa mais atualizar posições de elementos DOM
+                // Os hotspots 3D são fixos na cena
             }
             
             animate() {
@@ -1352,6 +1978,38 @@
                 }
             }
             
+            showInfo(title, description) {
+                const panel = document.getElementById('interactive-info-panel');
+                if (panel) {
+                    panel.querySelector('.interactive-info-title').textContent = title;
+                    panel.querySelector('.interactive-info-content').textContent = description;
+                    panel.classList.add('visible');
+                    
+                    setTimeout(() => {
+                        panel.classList.remove('visible');
+                    }, 4000);
+                }
+            }
+            
+            playSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 800;
+                    gainNode.gain.value = 0.1;
+                    
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                } catch (e) {
+                    console.log('Áudio não disponível');
+                }
+            }
+            
             clearHotspots() {
                 this.hotspots.forEach(hotspot => {
                     if (hotspot.marker) this.scene.remove(hotspot.marker);
@@ -1361,31 +2019,41 @@
             }
         }
 
-        // ============= SISTEMA VR FUNCIONAL COM GAZE ============= 
-        class OculusVRSystem {
+        // ============= SISTEMA VR APRIMORADO ============= 
+        class AdvancedVRSystem {
             constructor() {
                 this.isVRActive = false;
-                this.currentMode = null;
-                this.vrSession = null;
+                this.currentMode = null; // 'gyro' ou 'stereo'
+                this.gyroEnabled = false;
+                this.orientation = { alpha: 0, beta: 0, gamma: 0 };
                 this.gazeTarget = null;
                 this.gazeStartTime = 0;
-                this.gazeDuration = 2000; // 2 segundos para ativar
-                this.referenceSpace = null;
-                this.rightController = null;
-                this.leftController = null;
+                this.gazeDuration = 1500; // 2 segundos
                 
                 // Elementos DOM
                 this.vrButton = null;
                 this.vrSelectionScreen = null;
+                this.gyroMode = null;
+                this.stereoMode = null;
                 this.vrNotification = null;
-                this.gazeIndicator = null;
-                this.gazeProgress = null;
-                this.gazeProgressBar = null;
+                
+                // Renderizadores para modo estereoscópico
+                this.stereoRendererLeft = null;
+                this.stereoRendererRight = null;
+                this.stereoCameraLeft = null;
+                this.stereoCameraRight = null;
+                
+                // Gyro renderer
+                this.gyroRenderer = null;
+                this.gyroCamera = null;
             }
             
+            
+            
             init() {
-                console.log("🥽 Inicializando sistema VR com navegação por olhar...");
+                console.log("🥽 Inicializando sistema VR avançado...");
                 
+                // Aguardar carregamento do tour principal
                 if (!window.scene || !window.camera || !window.renderer) {
                     console.log("⏳ Aguardando carregamento do tour principal...");
                     setTimeout(() => this.init(), 100);
@@ -1396,58 +2064,366 @@
                 this.setupEvents();
                 this.checkDeviceSupport();
                 
-                console.log("✅ Sistema VR com gaze navigation inicializado");
+                // Verificar se tudo foi inicializado corretamente
+                if (this.vrButton) {
+                    console.log("✅ Sistema VR avançado inicializado com sucesso");
+                    console.log("🔍 Botão VR display:", this.vrButton.style.display);
+                    console.log("🔍 Botão VR visibility:", this.vrButton.style.visibility);
+                } else {
+                    console.error("❌ Falha na inicialização - botão VR não encontrado");
+
+                    
+                }
+
+                
             }
+
+            
             
             setupElements() {
+                console.log("🔍 Procurando elementos VR...");
                 this.vrButton = document.getElementById('vrButton');
                 this.vrSelectionScreen = document.getElementById('vrSelectionScreen');
+                this.gyroMode = document.getElementById('gyroMode');
+                this.stereoMode = document.getElementById('stereoMode');
                 this.vrNotification = document.getElementById('vrNotification');
-                this.gazeIndicator = document.getElementById('vrGazeIndicator');
-                this.gazeProgress = document.getElementById('vrGazeProgress');
-                this.gazeProgressBar = document.getElementById('vrGazeProgressBar');
+                
+                console.log("🔍 vrButton encontrado:", !!this.vrButton);
+                console.log("🔍 vrSelectionScreen encontrado:", !!this.vrSelectionScreen);
+                console.log("🔍 gyroMode encontrado:", !!this.gyroMode);
+                console.log("🔍 stereoMode encontrado:", !!this.stereoMode);
+                console.log("🔍 vrNotification encontrado:", !!this.vrNotification);
             }
             
             setupEvents() {
+                console.log("🔧 Configurando eventos VR...");
+                
+                // Botão principal VR
                 if (this.vrButton) {
-                    this.vrButton.addEventListener('click', () => this.showVRSelection());
-                    this.vrButton.addEventListener('touchstart', () => this.showVRSelection());
+                    console.log("✅ Botão VR encontrado, adicionando eventos...");
+                    
+                    // Remover eventos existentes
+                    this.vrButton.removeEventListener('click', this.vrButtonClickHandler);
+                    this.vrButton.removeEventListener('touchstart', this.vrButtonTouchHandler);
+                    
+                    // Criar handlers
+                    this.vrButtonClickHandler = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("🖱️ Botão VR clicado!");
+                        this.showVRSelection();
+                    };
+                    
+                    this.vrButtonTouchHandler = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("📱 Botão VR tocado!");
+                        this.showVRSelection();
+                    };
+                    
+                    // Adicionar eventos
+                    this.vrButton.addEventListener('click', this.vrButtonClickHandler);
+                    this.vrButton.addEventListener('touchstart', this.vrButtonTouchHandler, { passive: false });
+                    
+                    console.log("✅ Eventos do botão VR configurados");
+                } else {
+                    console.error("❌ Botão VR não encontrado para adicionar eventos!");
                 }
                 
+                // Botão fechar seleção
                 const vrCloseBtn = document.getElementById('vrCloseBtn');
                 if (vrCloseBtn) {
                     vrCloseBtn.addEventListener('click', () => this.hideVRSelection());
                 }
                 
+                // Modo giroscópio
                 const gyroModeBtn = document.getElementById('gyroModeBtn');
                 if (gyroModeBtn) {
                     gyroModeBtn.addEventListener('click', () => this.enterGyroMode());
                 }
                 
+                // Modo Oculus Quest 2
                 const questModeBtn = document.getElementById('questModeBtn');
                 if (questModeBtn) {
                     questModeBtn.addEventListener('click', () => this.enterQuestMode());
                 }
+                
+                /// ✅ BOTÃO SAIR VR - CORRIGIDO
+            const gyroExitBtn = document.getElementById('gyroExitBtn');
+            if (gyroExitBtn) {
+                // REMOVER EVENTOS EXISTENTES
+                gyroExitBtn.removeEventListener('click', this.exitVRHandler);
+                
+                // CRIAR NOVO HANDLER
+                this.exitVRHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log("🚪 Saindo do modo VR via botão");
+                    this.exitVR();
+                };
+                
+                // ADICIONAR EVENTOS
+                gyroExitBtn.addEventListener('click', this.exitVRHandler);
+                gyroExitBtn.addEventListener('touchstart', this.exitVRHandler, { passive: false });
+                
+                console.log("✅ Botão sair VR configurado");
+            } else {
+                console.error("❌ Botão gyroExitBtn não encontrado!");
+            }
+                
+                // Eventos de orientação
+                this.setupOrientationEvents();
+                
+                console.log("✅ Todos os eventos VR configurados");
             }
             
-            checkDeviceSupport() {
-                // VR sempre disponível
-                if (this.vrButton) {
-                    this.vrButton.style.display = 'flex';
-                    this.vrButton.style.visibility = 'visible';
-                    this.vrButton.style.opacity = '1';
-                    this.vrButton.style.pointerEvents = 'auto';
-                    console.log("✅ Botão VR ativo para DESKTOP e MOBILE");
+            setupOrientationEvents() {
+                // Verificar permissões iOS 13+
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    // iOS 13+ - necessário solicitar permissão
+                    console.log("📱 iOS detectado - permissão será solicitada");
+                } else if (window.DeviceOrientationEvent) {
+                    // Android e iOS mais antigos
+                    window.addEventListener('deviceorientation', (e) => this.handleOrientation(e));
+                    console.log("📱 Giroscópio configurado");
+                } else {
+                    console.log("⚠️ Giroscópio não disponível");
                 }
             }
+            
+            async requestOrientationPermission() {
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    try {
+                        const permission = await DeviceOrientationEvent.requestPermission();
+                        if (permission === 'granted') {
+                            window.addEventListener('deviceorientation', (e) => this.handleOrientation(e));
+                            console.log("✅ Permissão de orientação concedida");
+                            return true;
+                        } else {
+                            console.log("❌ Permissão de orientação negada");
+                            this.showNotification("⚠️ Permissão de giroscópio necessária para VR");
+                            return false;
+                        }
+                    } catch (error) {
+                        console.error("Erro ao solicitar permissão:", error);
+                        return false;
+                    }
+                } else {
+                    // Já configurado anteriormente
+                    return true;
+                }
+            }
+            initializeGyroCalibration() {
+    // CALIBRAÇÃO INICIAL PARA ESTABILIDADE
+    this.baseOrientation = { alpha: 0, beta: 0, gamma: 0 };
+    this.smoothYaw = 0;
+    this.smoothPitch = 0;
+    this.isCalibrated = false;
+    
+    console.log("🎯 Sistema de giroscópio calibrado");
+}
+            
+  handleOrientation(event) {
+    if (!this.isVRActive || this.currentMode !== 'gyro') return;
+    
+    // 📱 GIROSCÓPIO 360° LIVRE
+    const alpha = event.alpha || 0;  // Horizontal (0-360°)
+    const beta = event.beta || 0;    // Vertical (-180 a 180°)
+    
+    // CALIBRAÇÃO INICIAL
+    if (!this.gyroCalibrated) {
+        this.baseAlpha = alpha;
+        this.baseBeta = beta;
+        this.gyroCalibrated = true;
+        console.log("📱 Calibrado 360°:", alpha.toFixed(1), beta.toFixed(1));
+        return;
+    }
+    
+    // DIFERENÇA DIRETA - SUPORTE 360° COMPLETO
+    let deltaYaw = alpha - this.baseAlpha;
+    let deltaPitch = beta - this.baseBeta;
+    
+    // CORRIGIR WRAP 360°→0° APENAS
+    if (deltaYaw > 180) deltaYaw -= 360;
+    if (deltaYaw < -180) deltaYaw += 360;
+    
+    // ZONA MORTA MÍNIMA
+    if (Math.abs(deltaYaw) < 0.2) deltaYaw = 0;
+    if (Math.abs(deltaPitch) < 0.2) deltaPitch = 0;
+    
+    // ✅ SEM LIMITAÇÃO - ACEITA QUALQUER ÂNGULO
+    this.rawYaw = deltaYaw;
+    this.rawPitch = deltaPitch;
+    
+    this.applyDirectMovement();
+}
+            applyDirectMovement() {
+    if (!this.isVRActive || this.currentMode !== 'gyro' || !window.camera) return;
+    
+    // 📱 MOVIMENTO 360° LIVRE - SEM LIMITES
+    
+    // CONVERTER DIRETO - CORRIGIR DIREÇÃO
+    const targetYaw = this.rawYaw * (Math.PI / 180) * 0.6;   // ✅ SEM INVERSÃO (direita = direita)
+    const targetPitch = this.rawPitch * (Math.PI / 180) * 0.6; // Vertical normal
+    
+    // SUAVIZAÇÃO MÍNIMA
+    const smoothFactor = 0.25; // Um pouco mais suave
+    
+    if (this.currentYaw === undefined) this.currentYaw = 0;
+    if (this.currentPitch === undefined) this.currentPitch = 0;
+    
+    // INTERPOLAR - SEM LIMITES
+    this.currentYaw += (targetYaw - this.currentYaw) * smoothFactor;
+    this.currentPitch += (targetPitch - this.currentPitch) * smoothFactor;
+    
+    // ✅ SEM LIMITAÇÃO - MOVIMENTO 360° COMPLETO
+    // Removi os Math.max/Math.min que estavam travando
+    
+    // APLICAR À CÂMERA
+    window.camera.rotation.order = 'YXZ';
+    window.camera.rotation.y = this.currentYaw;   // Rotação horizontal livre
+    window.camera.rotation.x = this.currentPitch; // Rotação vertical livre
+    window.camera.rotation.z = 0;
+    
+    // MIRA
+    if (window.crosshairSystem?.isActive) {
+        window.crosshairSystem.update();
+    }
+
+
+    // DEBUG OCASIONAL
+    if (Math.random() < 0.005) { // 0.5% das vezes
+        console.log(`📱 Speed: ${speed.toFixed(1)}°/s, Sens: ${(sensitivity*100).toFixed(0)}%`);
+    }
+
+                            
+                        else if (this.currentMode === 'stereo') {
+                            // Aplicar às câmeras estereoscópicas
+                            if (this.stereoCameraLeft && this.stereoCameraRight) {
+                                this.stereoCameraLeft.rotation.y = targetRotationY;
+                                this.stereoCameraLeft.rotation.x = targetRotationX;
+                                this.stereoCameraRight.rotation.y = targetRotationY;
+                                this.stereoCameraRight.rotation.x = targetRotationX;
+                            }
+                        }
+                    }
+                                
+            
+            checkDeviceSupport() {
+            console.log("🥽 VR disponível para DESKTOP e MOBILE");
+            
+            // GARANTIR QUE O BOTÃO EXISTE NO DOM
+            this.ensureVRButtonExists();
+            
+            // AGUARDAR E CONFIGURAR
+            setTimeout(() => {
+                this.setupVRButton();
+            }, 500);
+         }
+
+        
+
+
+                ensureVRButtonExists() {
+                    let vrButton = document.getElementById('vrButton');
+                    
+                    if (!vrButton) {
+                        console.log("⚠️ Botão VR não existe! Criando...");
+                        
+                        // CRIAR O BOTÃO VR SE NÃO EXISTIR
+                        vrButton = document.createElement('div');
+                        vrButton.id = 'vrButton';
+                        vrButton.className = 'vr-button';
+                        vrButton.title = 'Modo VR';
+                        vrButton.innerHTML = `
+                            <svg class="vr-icon" viewBox="0 0 24 24">
+                                <path d="M20.84,4.22C20.5,4.08 20.15,4 19.8,4H4.2C3.85,4 3.5,4.08 3.16,4.22C2.44,4.53 2,5.25 2,6V18C2,18.75 2.44,19.47 3.16,19.78C3.5,19.92 3.85,20 4.2,20H19.8C20.15,20 20.5,19.92 20.84,19.78C21.56,19.47 22,18.75 22,18V6C22,5.25 21.56,4.53 20.84,4.22M12,6.5C13.38,6.5 14.5,7.62 14.5,9C14.5,10.38 13.38,11.5 12,11.5C10.62,11.5 9.5,10.38 9.5,9C9.5,7.62 10.62,6.5 12,6.5M7,6.5C8.38,6.5 9.5,7.62 9.5,9C9.5,10.38 8.38,11.5 7,11.5C5.62,11.5 4.5,10.38 4.5,9C4.5,7.62 5.62,6.5 7,6.5M17,6.5C18.38,6.5 19.5,7.62 19.5,9C19.5,10.38 18.38,11.5 17,11.5C15.62,11.5 14.5,10.38 14.5,9C14.5,7.62 15.62,6.5 17,6.5Z"/>
+                            </svg>
+                        `;
+                        
+                        // ADICIONAR AO BODY
+                        document.body.appendChild(vrButton);
+                        console.log("✅ Botão VR criado!");
+                    }
+                    
+                    this.vrButton = vrButton;
+                    return vrButton;
+                }
+
+                setupVRButton() {
+                    const vrButton = document.getElementById('vrButton');
+                    
+                    if (!vrButton) {
+                        console.error("❌ Botão VR ainda não existe!");
+                        return;
+                    }
+                    
+                    console.log("✅ Configurando botão VR...");
+                    
+                    // GARANTIR ESTILOS
+                    vrButton.style.position = 'fixed';
+                    vrButton.style.bottom = '30px';
+                    vrButton.style.right = '30px';
+                    vrButton.style.width = '70px';
+                    vrButton.style.height = '70px';
+                    vrButton.style.background = 'linear-gradient(145deg, #c7c7c7, #000000)';
+                    vrButton.style.border = 'none';
+                    vrButton.style.borderRadius = '20px';
+                    vrButton.style.cursor = 'pointer';
+                    vrButton.style.display = 'flex';
+                    vrButton.style.alignItems = 'center';
+                    vrButton.style.justifyContent = 'center';
+                    vrButton.style.zIndex = '9999';
+                    vrButton.style.opacity = '1';
+                    vrButton.style.visibility = 'visible';
+                    vrButton.style.pointerEvents = 'auto';
+                    
+                    // LIMPAR EVENTOS EXISTENTES
+                    const newVRButton = vrButton.cloneNode(true);
+                    vrButton.parentNode.replaceChild(newVRButton, vrButton);
+                    
+                    // EVENTO PRINCIPAL
+                    newVRButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("🥽 Botão VR clicado!");
+                        this.showVRSelection();
+                    });
+                    
+                    // EVENTOS TOUCH
+                    newVRButton.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("📱 Botão VR tocado!");
+                        this.showVRSelection();
+                    });
+                    
+                    console.log("✅ Botão VR configurado e funcionando!");
+                    
+                    // TESTE IMEDIATO
+                    setTimeout(() => {
+                        const testButton = document.getElementById('vrButton');
+                        console.log("🧪 Teste final:", {
+                            existe: !!testButton,
+                            visivel: testButton ? testButton.style.display : 'N/A',
+                            clicavel: testButton ? testButton.style.pointerEvents : 'N/A'
+                        });
+                    }, 100);
+                }
             
             showVRSelection() {
                 console.log("🥽 Abrindo seleção VR...");
                 if (this.vrSelectionScreen) {
+                    console.log("✅ Tela de seleção VR encontrada");
                     this.vrSelectionScreen.style.display = 'flex';
+                    this.vrSelectionScreen.style.visibility = 'visible';
+                    this.vrSelectionScreen.style.opacity = '0';
                     setTimeout(() => {
                         this.vrSelectionScreen.classList.add('visible');
+                        console.log("✅ Tela de seleção VR exibida");
                     }, 50);
+                } else {
+                    console.error("❌ Tela de seleção VR não encontrada!");
                 }
             }
             
@@ -1461,93 +2437,470 @@
                 }
             }
             
-            async enterGyroMode() {
-                console.log("📱 Entrando no modo VR livre");
-                this.hideVRSelection();
-                
-                // Verificar permissões de orientação
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                
-                if (isMobile && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    try {
-                        const permission = await DeviceOrientationEvent.requestPermission();
-                        if (permission !== 'granted') {
-                            this.showNotification("⚠️ Permissão de giroscópio necessária para VR");
-                            return;
+           async enterGyroMode() {
+                                        console.log("📱 Entrando no modo VR livre");
+                                        
+                                        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                                        
+                                        if (isMobile) {
+                                            const hasPermission = await this.requestOrientationPermission();
+                                            if (!hasPermission) {
+                                                this.hideVRSelection();
+                                                return;
+                                            }
+                                        }
+                                        
+                                        this.hideVRSelection();
+                                        this.currentMode = 'gyro';
+                                        this.isVRActive = true;
+
+                                    // 📱 RESETAR GIROSCÓPIO COMPLETAMENTE
+                                    this.resetGyroCalibration();
+
+                                    this.setupGazeInteraction();
+
+                                        // ✅ CONFIGURAR GAZE IGUAL AO QUEST 2
+                                        this.setupGazeInteraction();
+                                        
+                                        // ✅ FORÇAR MIRA IMEDIATAMENTE
+                                        this.forceCrosshairVisibility();
+                                        
+                                        // Configurar renderer para modo gyro
+                                        this.setupGyroRenderer();
+
+                                        // Mostrar interface gyro
+                                        if (this.gyroMode) {
+                                            this.gyroMode.classList.add('active');
+                                            document.body.classList.add('gyro-active');
+                                        }
+                                        
+                                        // Fullscreen se disponível
+                                        if (this.gyroMode && this.gyroMode.requestFullscreen) {
+                                            this.gyroMode.requestFullscreen();
+                                        }
+                                        
+                                        const deviceType = isMobile ? "Mobile" : "Desktop";
+                                        this.showNotification(`🥽 Modo VR Livre Ativado! (${deviceType})<br>${isMobile ? 'Mova o celular e olhe por 2s para navegar' : 'Use o mouse para navegar'}`);
+                                        
+                                        // ✅ INICIAR GAZE DETECTION POR ÚLTIMO
+                                        this.startGyroGazeDetection();
+
+                                        setTimeout(() => {
+                                        const crosshair = document.getElementById('crosshairPointer');
+                                        console.log("🧪 TESTE FINAL DA MIRA:", {
+                                            existe: !!crosshair,
+                                            visivel: crosshair ? crosshair.style.display : 'N/A',
+                                            opacity: crosshair ? crosshair.style.opacity : 'N/A',
+                                            ativo: window.crosshairSystem ? window.crosshairSystem.isActive : false
+                                        });
+                                    }, 2000);
+                                    }
+                                    startGyroGazeDetection() {
+                                        if (!this.isVRActive || this.currentMode !== 'gyro') return;
+                                        
+                                        // ✅ MESMO SISTEMA DE GAZE DO QUEST 2
+                                        this.updateGazeDetection();
+                                        
+                                        // Continuar loop
+                                        requestAnimationFrame(() => this.startGyroGazeDetection());
+                                    }
+
+                                                        forceCrosshairVisibility() {
+                                        const forceMira = () => {
+                                            if (window.crosshairSystem) {
+                                                window.crosshairSystem.show();
+                                                window.crosshairSystem.setVRMode(true);
+                                                window.crosshairSystem.isActive = true;
+                                            }
+                                            
+                                            // FORÇAR ELEMENTOS DOM
+                                            const crosshair = document.getElementById('crosshairPointer');
+                                            const progress = document.getElementById('crosshairProgress');
+                                            const tooltip = document.getElementById('crosshairTooltip');
+                                            
+                                            if (crosshair) {
+                                                crosshair.style.display = 'block !important';
+                                                crosshair.style.visibility = 'visible !important';
+                                                crosshair.style.opacity = '1 !important';
+                                                crosshair.style.zIndex = '25000 !important';
+                                                crosshair.style.position = 'fixed !important';
+                                                crosshair.style.top = '50% !important';
+                                                crosshair.style.left = '50% !important';
+                                                crosshair.style.transform = 'translate(-50%, -50%) !important';
+                                                crosshair.style.pointerEvents = 'none !important';
+                                                console.log("🎯 Mira FORÇADA visível!");
+                                            }
+                                            
+                                            if (progress) {
+                                                progress.style.display = 'block';
+                                                progress.style.position = 'fixed';
+                                                progress.style.zIndex = '25000';
+                                            }
+                                            
+                                            if (tooltip) {
+                                                tooltip.style.display = 'block';
+                                                tooltip.style.position = 'fixed';
+                                                tooltip.style.zIndex = '25000';
+                                            }
+                                        };
+                                        
+                                        // Executar múltiplas vezes para garantir
+                                        forceMira();
+                                        setTimeout(forceMira, 100);
+                                        setTimeout(forceMira, 500);
+                                        setTimeout(forceMira, 1000);
+                                    }
+                                    forceCrosshairVisibility() {
+                                        const forceMira = () => {
+                                            if (window.crosshairSystem) {
+                                                window.crosshairSystem.show();
+                                                window.crosshairSystem.setVRMode(true);
+                                                window.crosshairSystem.isActive = true;
+                                            }
+                                            
+                                            // FORÇAR ELEMENTOS DOM
+                                            const crosshair = document.getElementById('crosshairPointer');
+                                            const progress = document.getElementById('crosshairProgress');
+                                            const tooltip = document.getElementById('crosshairTooltip');
+                                            
+                                            if (crosshair) {
+                                                crosshair.style.display = 'block !important';
+                                                crosshair.style.visibility = 'visible !important';
+                                                crosshair.style.opacity = '1 !important';
+                                                crosshair.style.zIndex = '25000 !important';
+                                                crosshair.style.position = 'fixed !important';
+                                                crosshair.style.top = '50% !important';
+                                                crosshair.style.left = '50% !important';
+                                                crosshair.style.transform = 'translate(-50%, -50%) !important';
+                                                crosshair.style.pointerEvents = 'none !important';
+                                                console.log("🎯 Mira FORÇADA visível!");
+                                            }
+                                            
+                                            if (progress) {
+                                                progress.style.display = 'block';
+                                                progress.style.position = 'fixed';
+                                                progress.style.zIndex = '25000';
+                                            }
+                                            
+                                            if (tooltip) {
+                                                tooltip.style.display = 'block';
+                                                tooltip.style.position = 'fixed';
+                                                tooltip.style.zIndex = '25000';
+                                            }
+                                        };
+                                        
+                                        // Executar múltiplas vezes para garantir
+                                        forceMira();
+                                        setTimeout(forceMira, 100);
+                                        setTimeout(forceMira, 500);
+                                        setTimeout(forceMira, 1000);
+                                        
+                                        // ✅ NOVA LINHA - VERIFICAR CONTINUAMENTE
+                                        const miraContinua = setInterval(() => {
+                                            if (this.currentMode === 'gyro' && this.isVRActive) {
+                                                forceMira();
+                                            } else {
+                                                clearInterval(miraContinua);
+                                            }
+                                        }, 2000);
+                                    }
+                                
+                            async enterQuestMode() {
+                        console.log("🥽 Entrando no modo Oculos Quest 2...");
+
+                        this.hideVRSelection();
+
+                        try {
+                            // Verificar WebXR
+                            if (!navigator.xr) {
+                                this.showNotification("❌ WebXR não suportado. Use o Oculos Browser no Quest 2.");
+                                return;
+                            }
+                            
+                            // Verificar suporte VR
+                            const isVRSupported = await navigator.xr.isSessionSupported('immersive-vr');
+                            if (!isVRSupported) {
+                                this.showNotification("❌ VR não suportado. Acesse pelo Oculos Browser no Quest 2.");
+                                return;
+                            }
+                            
+                            console.log("✅ Quest 2 detectado! Iniciando WebXR...");
+                            
+                            // CRIAR SESSÃO VR
+                            const session = await navigator.xr.requestSession('immersive-vr', {
+                                requiredFeatures: ['local-floor'],
+                                optionalFeatures: ['hand-tracking', 'bounded-floor']
+                            });
+                            
+                            this.vrSession = session;
+                            this.currentMode = 'quest';
+                            this.isVRActive = true;
+                            
+                            // ADICIONAR CLASSE PARA CSS
+                            document.body.classList.add('vr-quest-mode');
+                            
+                            // CONFIGURAR RENDERER PARA VR
+                            window.renderer.xr.enabled = true;
+                            
+                        // USAR LOOP DE ANIMAÇÃO NORMAL EM VEZ DE renderVR
+                        
+                           window.renderer.setAnimationLoop(() => {
+                        if (this.isVRActive && this.currentMode === 'quest') {
+                            // CRIAR MIRA 3D DENTRO DA CENA VR
+                            this.createVRCrosshair();
+                            
+                            // DETECTAR GAZE NOS HOTSPOTS
+                            this.updateGazeDetection();
+                            
+                            // RENDERIZAR AUTOMÁTICO PELO WebXR
+                            window.renderer.render(window.scene, window.camera);
                         }
-                    } catch (error) {
-                        console.error("Erro ao solicitar permissão:", error);
+                    });
+                                                // CONFIGURAR SESSÃO NO RENDERER
+                            await window.renderer.xr.setSession(session);
+                            
+                            // CONFIGURAR ESPAÇO DE REFERÊNCIA
+                            this.referenceSpace = await session.requestReferenceSpace('local-floor');
+                            
+                            // CONFIGURAR CONTROLES E GAZE
+                            this.setupQuestControllers(session);
+                            this.setupGazeInteraction();
+                            
+                            // ENTRAR EM TELA CHEIA AUTOMÁTICA
+                            document.body.requestFullscreen?.();
+                            
+                            console.log("🥽 VR ATIVO - Movimento de cabeça e gaze funcionando!");
+
+                             
+                                this.forceCrosshairForQuest();      
+                                this.startQuestCrosshairLoop();
+
+                                this.showNotification("🥽 VR Ativo! Olhe para hotspots por 2s para navegar");
+
+                        
+                            
+                        } catch (error) {
+                            console.error("❌ Erro WebXR:", error);
+                            this.showNotification("❌ Erro ao conectar Quest 2. Tente novamente.");
+                            this.exitVR();
+                        }
                     }
-                }
+
+                                        renderVR() {
+                                    if (!this.isVRActive || this.currentMode !== 'quest') return;
+                                    
+                                    // RENDERIZAÇÃO AUTOMÁTICA PELO WebXR
+                                    window.renderer.render(window.scene, window.camera);
+                                    
+                                    // DETECTAR GAZE NOS HOTSPOTS
+                                    this.updateGazeDetection();
+
+                                    if (window.crosshairSystem) {
+                                    window.crosshairSystem.setVRMode(true);
+                                    window.crosshairSystem.show();
+                                    console.log("🎯 Mira ativada para Quest 2");
+                    }
+                                }
+
+
+            setupQuestControllers(session) {
+                console.log("🎮 Configurando controles Quest 2...");
                 
-                this.currentMode = 'gyro';
-                this.isVRActive = true;
+                // DETECTAR DESCONEXÃO
+                session.addEventListener('end', () => {
+                    console.log("🚪 Sessão VR encerrada");
+                    this.exitVR();
+                });
                 
-                this.showNotification("📱 Modo VR Livre Ativado!<br>Mova o dispositivo para explorar");
+                // DETECTAR CONTROLES
+                session.addEventListener('inputsourceschange', (event) => {
+                    event.added.forEach(inputSource => {
+                        if (inputSource.handedness === 'right') {
+                            this.rightController = inputSource;
+                            console.log("✅ Controle direito conectado");
+                        }
+                        if (inputSource.handedness === 'left') {
+                            this.leftController = inputSource;
+                            console.log("✅ Controle esquerdo conectado");
+                        }
+                    });
+                });
+                
+                console.log("✅ Controles Quest configurados!");
+            }
+
+            setupGazeInteraction() {
+            this.gazeTarget = null;
+            this.gazeStartTime = 0;
+            this.gazeDuration = 1500; // 2 segundos olhando
+            
+            console.log("👁️ Sistema de olhar para navegar configurado (Quest + Gyro)");
+        }
+
+     resetGyroCalibration() {
+    // RESET SIMPLES E DIRETO
+    this.gyroCalibrated = false;
+    this.baseAlpha = 0;
+    this.baseBeta = 0;
+    this.rawYaw = 0;
+    this.rawPitch = 0;
+    this.currentYaw = 0;
+    this.currentPitch = 0;
+    
+    if (navigator.vibrate) {
+        navigator.vibrate([100]);
+    }
+    
+    console.log("📱 Reset - movimento livre");
+}
+
+           updateGazeDetection() {
+    // ✅ FUNCIONAR TANTO NO QUEST QUANTO NO GYRO
+    if (!this.isVRActive || !window.hotspotSystem || !window.raycaster) return;
+    if (this.currentMode !== 'quest' && this.currentMode !== 'gyro') return;
+    
+    // ✅ ATIVAR CROSSHAIR EM AMBOS OS MODOS
+    if (window.crosshairSystem && (this.currentMode === 'quest' || this.currentMode === 'gyro')) {
+        window.crosshairSystem.show();
+        window.crosshairSystem.setVRMode(true);
+        window.crosshairSystem.update();
+    }
+    
+    // USAR CENTRO DA VISÃO (onde está olhando)
+    const direction = new THREE.Vector3(0, 0, -1);
+    direction.applyQuaternion(window.camera.quaternion);
+    
+    window.raycaster.set(window.camera.position, direction);
+    
+    // VERIFICAR HOTSPOTS
+    const hotspots = window.hotspotSystem.hotspots.map(h => h.marker).filter(m => m);
+    const intersects = window.raycaster.intersectObjects(hotspots);
+    
+    if (intersects.length > 0) {
+        const target = intersects[0].object;
+        
+        // NOVO ALVO
+        if (target !== this.gazeTarget) {
+            this.gazeTarget = target;
+            this.gazeStartTime = Date.now();
+            
+            // ✅ FEEDBACK VISUAL PARA AMBOS OS MODOS
+            if (window.crosshairSystem) {
+                const hotspotData = target.userData.hotspotData;
+                if (hotspotData && window.crosshairSystem.tooltip) {
+    // REMOVER TOOLTIP - SÓ MOSTRAR BARRA DE PROGRESSO
+    // window.crosshairSystem.tooltip.textContent = `${hotspotData.label}`;
+    // window.crosshairSystem.tooltip.classList.add('show');
+}
             }
             
-            async enterQuestMode() {
-                console.log("🥽 Entrando no modo Oculus Quest 2...");
-                this.hideVRSelection();
-                
-                try {
-                    if (!navigator.xr) {
-                        this.showNotification("❌ WebXR não suportado.<br>Acesse pelo Oculus Browser no Quest 2.");
-                        return;
-                    }
-                    
-                    const isVRSupported = await navigator.xr.isSessionSupported('immersive-vr');
-                    if (!isVRSupported) {
-                        this.showNotification("❌ Quest 2 não detectado.<br>Conecte o headset e acesse pelo Oculus Browser.");
-                        return;
-                    }
-                    
-                    console.log("✅ Quest 2 detectado! Iniciando modo VR...");
-                    this.showNotification("🥽 Quest 2 detectado! Entrando em VR...");
-                    
-                    const vrSession = await navigator.xr.requestSession('immersive-vr', {
-                        requiredFeatures: ['local-floor'],
-                        optionalFeatures: ['hand-tracking', 'layers']
-                    });
-                    
-                    this.vrSession = vrSession;
-                    this.currentMode = 'quest';
-                    this.isVRActive = true;
-                    
-                    if (window.renderer) {
-                        window.renderer.xr.enabled = true;
-                        await window.renderer.xr.setSession(vrSession);
-                        
-                        const referenceSpace = await vrSession.requestReferenceSpace('local-floor');
-                        this.referenceSpace = referenceSpace;
-                        
-                        this.setupQuestControls(vrSession);
-                        this.startQuestRenderLoop();
-                        this.startGazeDetection();
-                        
-                        console.log("✅ Quest 2 VR ativo com navegação por olhar!");
-                        this.showNotification("🥽 VR Ativo! Olhe para hotspots por 2s para navegar.");
-                    }
-                    
-                } catch (error) {
-                    console.error("❌ Erro ao iniciar Quest VR:", error);
-                    if (error.name === 'NotAllowedError') {
-                        this.showNotification("❌ Permissão VR negada.<br>Permita acesso VR e tente novamente.");
-                    } else {
-                        this.showNotification("❌ Erro ao conectar Quest 2.<br>Verifique conexão e tente novamente.");
-                    }
-                    this.exitVR();
+            console.log(`👁️ Olhando para: ${target.userData.hotspotData?.label || 'Hotspot'}`);
+        }
+        
+        // CALCULAR PROGRESSO
+        const elapsed = Date.now() - this.gazeStartTime;
+        const progress = Math.min(elapsed / this.gazeDuration, 1);
+        
+        // ✅ VISUAL FEEDBACK PARA AMBOS OS MODOS
+        if (target.material) {
+            target.material.opacity = 0.5 + (progress * 0.5);
+        }
+        
+        // ✅ ATUALIZAR BARRA DE PROGRESSO
+        if (window.crosshairSystem && window.crosshairSystem.progressBar) {
+            window.crosshairSystem.progressBar.style.width = (progress * 100) + '%';
+            if (window.crosshairSystem.progress) {
+                window.crosshairSystem.progress.classList.add('show');
+            }
+        }
+        
+        // ATIVAR APÓS 2 SEGUNDOS
+        if (progress >= 1) {
+            this.activateGazeHotspot(target);
+        }
+        
+    } else {
+        // LIMPAR GAZE
+        this.clearGaze();
+    }
+}
+
+
+           activateGazeHotspot(target) {
+    if (target && target.userData && target.userData.hotspotData) {
+        const data = target.userData.hotspotData;
+        
+        console.log(`👁️ NAVEGAÇÃO POR OLHAR (${this.currentMode.toUpperCase()}): ${data.label}`);
+        
+        // ✅ FEEDBACK HÁPTICO PARA MOBILE (GYRO)
+        if (this.currentMode === 'gyro' && navigator.vibrate) {
+            navigator.vibrate([200, 100, 200]); // Vibração mais forte para mobile
+        }
+        
+        // FEEDBACK HÁPTICO NOS CONTROLES QUEST
+        if (this.currentMode === 'quest' && this.rightController?.gamepad?.hapticActuators?.[0]) {
+            this.rightController.gamepad.hapticActuators[0].pulse(0.8, 300);
+        }
+        
+        // ✅ FEEDBACK VISUAL FORTE
+        if (target.material) {
+            target.material.color.setHex(0x00ff00); // Verde
+            setTimeout(() => {
+                target.material.color.setHex(0x808080); // Voltar ao cinza
+            }, 500);
+        }
+        
+        // NAVEGAR PARA NOVO AMBIENTE
+        if (window.hotspotSystem) {
+            window.hotspotSystem.activateHotspot(data);
+        }
+        
+        // NOTIFICAÇÃO
+        this.showNotification(`✅ Navegando para: ${data.label}`);
+        
+        // RESETAR GAZE
+        this.clearGaze();
+    }
+}
+
+                clearGaze() {
+            if (this.gazeTarget && this.gazeTarget.material) {
+                this.gazeTarget.material.opacity = 0.85; // Voltar ao normal
+            }
+            
+            this.gazeTarget = null;
+            this.gazeStartTime = 0;
+            
+            // ✅ LIMPAR ELEMENTOS VISUAIS PARA AMBOS OS MODOS
+            if (window.crosshairSystem) {
+                if (window.crosshairSystem.progress) {
+                    window.crosshairSystem.progress.classList.remove('show');
+                }
+                if (window.crosshairSystem.progressBar) {
+                    window.crosshairSystem.progressBar.style.width = '0%';
+                }
+                if (window.crosshairSystem.tooltip) {
+                    window.crosshairSystem.tooltip.classList.remove('show');
+                }
+                if (window.crosshairSystem.crosshair) {
+                    window.crosshairSystem.crosshair.classList.remove('targeting');
+                }
+                if (window.crosshairSystem.arrow) {
+                    window.crosshairSystem.arrow.classList.remove('targeting');
                 }
             }
+        }
             
             setupQuestControls(session) {
-                console.log("🎮 Configurando controles Quest com gaze navigation...");
+                console.log("🎮 Configurando movimento 360° e controles Quest...");
                 
+                // Evento para encerrar VR
                 session.addEventListener('end', () => {
                     console.log("🚪 Saindo do modo VR Quest");
                     this.exitVR();
                 });
                 
+                // Detectar controles Quest
                 session.addEventListener('inputsourceschange', (event) => {
                     event.added.forEach(inputSource => {
                         if (inputSource.handedness === 'right') {
@@ -1560,60 +2913,210 @@
                     });
                 });
                 
-                console.log("✅ Controles Quest configurados com gaze navigation!");
+                console.log("✅ Movimento livre 360° configurado!");
             }
             
             startQuestRenderLoop() {
                 if (!this.isVRActive || this.currentMode !== 'quest' || !this.vrSession) return;
                 
+                // LOOP DE RENDERIZAÇÃO VR COM MOVIMENTO 360°
                 this.vrSession.requestAnimationFrame((time, frame) => {
                     if (!frame || !this.isVRActive) return;
                     
+                    // OBTER POSIÇÃO E ROTAÇÃO DA CABEÇA (MOVIMENTO NATURAL)
                     const pose = frame.getViewerPose(this.referenceSpace);
                     if (pose) {
+                        // Aplicar movimento da cabeça ao tour 360°
                         const views = pose.views;
                         
                         for (let view of views) {
                             const transform = view.transform;
                             
+                            // MOVIMENTO PARA CIMA/BAIXO/LADOS AUTOMÁTICO
                             if (window.camera) {
+                                // Aplicar rotação natural da cabeça
                                 window.camera.matrix.fromArray(transform.matrix);
                                 window.camera.matrix.decompose(
                                     window.camera.position,
                                     window.camera.quaternion,
                                     window.camera.scale
                                 );
+                                
+                                // Atualizar matriz da câmera
                                 window.camera.updateMatrixWorld();
                             }
                         }
+                        
+                        // Verificar input dos controles
+                        this.handleQuestInput(frame);
                     }
                     
+                    // RENDERIZAR CENA 360° EM VR
                     if (window.renderer && window.scene && window.camera) {
+                        // Renderização automática pelo Three.js XR
                         window.renderer.render(window.scene, window.camera);
                     }
                     
+                    // Continuar loop VR
                     this.startQuestRenderLoop();
                 });
             }
             
-            startGazeDetection() {
-                if (!this.isVRActive || this.currentMode !== 'quest') return;
-                
-                // Mostrar indicador de gaze
-                if (this.gazeIndicator) {
-                    this.gazeIndicator.classList.add('show');
+            handleQuestInput(frame) {
+                // CONTROLES QUEST PARA NAVEGAÇÃO
+                if (this.rightController && this.rightController.gamepad) {
+                    const gamepad = this.rightController.gamepad;
+                    
+                    // BOTÃO A (0) - ATIVAR HOTSPOTS
+                    if (gamepad.buttons[0] && gamepad.buttons[0].pressed && !this.buttonPressed) {
+                        this.buttonPressed = true;
+                        this.activateQuestHotspot();
+                    } else if (!gamepad.buttons[0].pressed) {
+                        this.buttonPressed = false;
+                    }
+                    
+                    // JOYSTICK DIREITO - ROTAÇÃO ADICIONAL (OPCIONAL)
+                    if (gamepad.axes.length >= 4) {
+                        const stickX = gamepad.axes[2]; // Horizontal
+                        const stickY = gamepad.axes[3]; // Vertical
+                        
+                        if (Math.abs(stickX) > 0.2 || Math.abs(stickY) > 0.2) {
+                            // Rotação suave adicional com joystick
+                            if (window.camera) {
+                                window.camera.rotation.y += stickX * 0.01;
+                                window.camera.rotation.x += stickY * 0.01;
+                                
+                                // Limitar rotação vertical
+                                window.camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, window.camera.rotation.x));
+                            }
+                        }
+                    }
                 }
+            }
+            
+            activateQuestHotspot() {
+                // DETECTAR HOTSPOT NO CENTRO DA VISÃO
+                if (!window.hotspotSystem || !window.raycaster) return;
+                
+                // Centro da visão VR
+                window.mouse.x = 0;
+                window.mouse.y = 0;
+                window.raycaster.setFromCamera(window.mouse, window.camera);
+                
+                const hotspots = window.hotspotSystem.hotspots.map(h => h.marker).filter(m => m);
+                const intersects = window.raycaster.intersectObjects(hotspots);
+                
+                if (intersects.length > 0) {
+                    const hotspotData = intersects[0].object.userData.hotspotData;
+                    if (hotspotData) {
+                        console.log(`🥽 Quest Navigation: ${hotspotData.label}`);
+                        
+                        // FEEDBACK HÁPTICO NO CONTROLE
+                        if (this.rightController.gamepad && this.rightController.gamepad.hapticActuators) {
+                            this.rightController.gamepad.hapticActuators[0].pulse(0.8, 200);
+                        }
+                        
+                        // NAVEGAR PARA NOVO AMBIENTE
+                        if (window.hotspotSystem) {
+                            window.hotspotSystem.activateHotspot(hotspotData);
+                        }
+                    }
+                } else {
+                    // Feedback quando não há hotspot
+                    if (this.rightController.gamepad && this.rightController.gamepad.hapticActuators) {
+                        this.rightController.gamepad.hapticActuators[0].pulse(0.3, 100);
+                    }
+                }
+            }
+            
+            setupGyroRenderer() {
+                const gyroViewer = document.getElementById('gyroViewer');
+                if (!gyroViewer || !window.renderer) return;
+                
+                // Usar o renderer principal mas no container gyro
+                gyroViewer.innerHTML = '';
+                gyroViewer.appendChild(window.renderer.domElement);
+                
+                // Configurar status
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+               
+            }
+            
+            setupStereoRenderers() {
+                const canvasLeft = document.getElementById('stereoCanvasLeft');
+                const canvasRight = document.getElementById('stereoCanvasRight');
+                
+                if (!canvasLeft || !canvasRight || !window.THREE) return;
+                
+                try {
+                    const width = canvasLeft.clientWidth;
+                    const height = canvasLeft.clientHeight;
+                    
+                    // Renderer esquerdo
+                    this.stereoRendererLeft = new THREE.WebGLRenderer({ 
+                        canvas: canvasLeft,
+                        antialias: true 
+                    });
+                    this.stereoRendererLeft.setSize(width, height);
+                    
+                    // Renderer direito
+                    this.stereoRendererRight = new THREE.WebGLRenderer({ 
+                        canvas: canvasRight,
+                        antialias: true 
+                    });
+                    this.stereoRendererRight.setSize(width, height);
+                    
+                    // Câmeras com separação ocular
+                    this.stereoCameraLeft = window.camera.clone();
+                    this.stereoCameraRight = window.camera.clone();
+                    
+                    const eyeSeparation = 0.032; // 32mm separação típica
+                    this.stereoCameraLeft.position.x = -eyeSeparation;
+                    this.stereoCameraRight.position.x = eyeSeparation;
+                    
+                    console.log("✅ Renderizadores estereoscópicos configurados");
+                } catch (error) {
+                    console.error("❌ Erro ao configurar renderizadores:", error);
+                }
+            }
+            
+            startGyroRenderLoop() {
+                if (!this.isVRActive || this.currentMode !== 'gyro') return;
+                
+                // O loop principal já renderiza, apenas garantir que continue
+                requestAnimationFrame(() => this.startGyroRenderLoop());
+            }
+            
+            startStereoRenderLoop() {
+                if (!this.isVRActive || this.currentMode !== 'stereo') return;
+                
+                if (this.stereoRendererLeft && this.stereoRendererRight && window.scene) {
+                    // Sincronizar rotação com a câmera principal
+                    this.stereoCameraLeft.rotation.copy(window.camera.rotation);
+                    this.stereoCameraRight.rotation.copy(window.camera.rotation);
+                    
+                    // Renderizar para ambos os olhos
+                    this.stereoRendererLeft.render(window.scene, this.stereoCameraLeft);
+                    this.stereoRendererRight.render(window.scene, this.stereoCameraRight);
+                }
+                
+                requestAnimationFrame(() => this.startStereoRenderLoop());
+            }
+            
+            startGazeDetection() {
+                if (!this.isVRActive || this.currentMode !== 'stereo') return;
                 
                 this.detectGaze();
                 requestAnimationFrame(() => this.startGazeDetection());
             }
             
             detectGaze() {
-                if (!this.isVRActive || !window.hotspotSystem || !window.raycaster) return;
+                if (!this.isVRActive || !window.hotspotSystem || !window.raycaster || !window.mouse) return;
                 
-                // Usar centro da visão (0,0) como ponto de olhar
-                const centerVector = new THREE.Vector2(0, 0);
-                window.raycaster.setFromCamera(centerVector, window.camera);
+                // Usar centro da tela como ponto de olhar
+                window.mouse.x = 0;
+                window.mouse.y = 0;
+                window.raycaster.setFromCamera(window.mouse, window.camera);
                 
                 const hotspots = window.hotspotSystem.hotspots.map(h => h.marker).filter(m => m);
                 const intersects = window.raycaster.intersectObjects(hotspots);
@@ -1622,15 +3125,9 @@
                     const target = intersects[0].object;
                     
                     if (target !== this.gazeTarget) {
-                        // Novo alvo
                         this.gazeTarget = target;
                         this.gazeStartTime = Date.now();
                         this.showGazeProgress();
-                        
-                        // Feedback háptico sutil
-                        if (this.rightController && this.rightController.gamepad && this.rightController.gamepad.hapticActuators) {
-                            this.rightController.gamepad.hapticActuators[0].pulse(0.3, 100);
-                        }
                     }
                     
                     const elapsed = Date.now() - this.gazeStartTime;
@@ -1648,14 +3145,16 @@
             }
             
             showGazeProgress() {
-                if (this.gazeProgress) {
-                    this.gazeProgress.classList.add('show');
+                const progressEl = document.getElementById('stereoProgress');
+                if (progressEl) {
+                    progressEl.classList.add('show');
                 }
             }
             
             updateGazeProgress(progress) {
-                if (this.gazeProgressBar) {
-                    this.gazeProgressBar.style.width = (progress * 100) + '%';
+                const progressBar = document.getElementById('stereoProgressBar');
+                if (progressBar) {
+                    progressBar.style.width = (progress * 100) + '%';
                 }
             }
             
@@ -1663,12 +3162,11 @@
                 this.gazeTarget = null;
                 this.gazeStartTime = 0;
                 
-                if (this.gazeProgress) {
-                    this.gazeProgress.classList.remove('show');
-                }
-                if (this.gazeProgressBar) {
-                    this.gazeProgressBar.style.width = '0%';
-                }
+                const progressEl = document.getElementById('stereoProgress');
+                const progressBar = document.getElementById('stereoProgressBar');
+                
+                if (progressEl) progressEl.classList.remove('show');
+                if (progressBar) progressBar.style.width = '0%';
             }
             
             activateGazeTarget() {
@@ -1676,9 +3174,9 @@
                     const data = this.gazeTarget.userData.hotspotData;
                     console.log(`🥽 VR Gaze Navigation: ${data.label}`);
                     
-                    // Feedback háptico forte
-                    if (this.rightController && this.rightController.gamepad && this.rightController.gamepad.hapticActuators) {
-                        this.rightController.gamepad.hapticActuators[0].pulse(0.8, 200);
+                    // Vibração se disponível
+                    if (navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100]);
                     }
                     
                     // Ativar hotspot
@@ -1690,34 +3188,113 @@
                 }
             }
             
-            exitVR() {
-                console.log("🚪 Saindo do modo VR");
-                
-                if (this.vrSession) {
-                    this.vrSession.end();
-                    this.vrSession = null;
-                }
-                
-                this.isVRActive = false;
-                this.currentMode = null;
-                this.clearGaze();
-                
-                // Ocultar indicadores VR
-                if (this.gazeIndicator) {
-                    this.gazeIndicator.classList.remove('show');
-                }
-                
-                if (window.renderer) {
-                    window.renderer.xr.enabled = false;
-                }
-                
-                this.showNotification("📱 VR Desativado");
-            }
+          exitVR() {
+
+            
+    console.log("🚪 Saindo do modo VR");
+    
+    // ✅ RESET ESPECÍFICO DO GYRO
+    if (this.currentMode === 'gyro') {
+        this.gyroCalibrated = false;
+        this.currentYaw = 0;
+        this.currentPitch = 0;
+        console.log("📱 Variáveis do giroscópio resetadas");
+    }
+
+    console.log("🚪 Saindo do modo VR");
+    
+ // ESCONDER MIRA E ELEMENTOS AO SAIR
+if (window.crosshairSystem) {
+    window.crosshairSystem.hide();
+    // FORÇAR ESCONDER TODOS OS ELEMENTOS VR
+    const crosshair = document.getElementById('crosshairPointer');
+    const progress = document.getElementById('crosshairProgress');
+    const tooltip = document.getElementById('crosshairTooltip');
+    
+    if (crosshair) crosshair.style.display = 'none';
+    if (progress) progress.style.display = 'none';
+    if (tooltip) tooltip.style.display = 'none';
+}
+    // REMOVER MIRA 3D
+if (this.vrCrosshair3D) {
+    window.scene.remove(this.vrCrosshair3D);
+    this.vrCrosshair3D = null;
+}
+    
+    
+    // ENCERRAR SESSÃO WEBXR
+    if (this.vrSession) {
+        this.vrSession.end();
+        this.vrSession = null;
+    }
+    
+    this.isVRActive = false;
+    this.currentMode = null;
+    this.clearGaze();
+    
+    // REMOVER CLASSE DO BODY
+  
+    document.body.classList.remove('gyro-active');
+    document.body.classList.remove('vr-quest-mode');
+
+    // RESETAR RENDERER
+    if (window.renderer) {
+        window.renderer.xr.enabled = false;
+        window.renderer.setAnimationLoop(null);
+        
+        // VOLTAR AO CONTAINER NORMAL
+        const viewer = document.getElementById('viewer');
+        if (viewer) {
+            viewer.innerHTML = '';
+            viewer.appendChild(window.renderer.domElement);
+        }
+
+        
+    }
+    
+    // OCULTAR INTERFACES VR
+    if (this.gyroMode) this.gyroMode.classList.remove('active');
+    
+    // SAIR DO FULLSCREEN
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    }
+    
+    // VOLTAR AO LOOP NORMAL
+    if (!window.animationStarted) {
+        animate();
+        window.animationStarted = true;
+    }
+    
+    this.showNotification("📱 VR Desativado");
+
+    // ESCONDER MIRA AO SAIR DO VR
+    if (window.crosshairSystem) {
+        window.crosshairSystem.hide();
+        console.log("🎯 Mira desativada");
+    }
+}
+
+renderVR() {
+    if (!this.isVRActive || this.currentMode !== 'quest') return;
+    
+    // RENDERIZAÇÃO AUTOMÁTICA PELO WebXR
+    window.renderer.render(window.scene, window.camera);
+    
+    // ATIVAR MIRA NO QUEST 2
+    if (window.crosshairSystem) {
+        window.crosshairSystem.show();
+        window.crosshairSystem.update();
+        console.log("🎯 Mira ativada para Quest 2");
+    }
+    
+    // DETECTAR GAZE NOS HOTSPOTS
+    this.updateGazeDetection();
+}
             
             showNotification(message) {
                 if (this.vrNotification) {
                     this.vrNotification.innerHTML = message;
-                    this.vrNotification.classList.remove('error');
                     this.vrNotification.classList.add('show');
                     
                     setTimeout(() => {
@@ -1725,66 +3302,456 @@
                     }, 3000);
                 }
             }
-            
-            showErrorNotification(title, message) {
-                if (this.vrNotification) {
-                    this.vrNotification.innerHTML = `
-                        <div class="error-title">${title}</div>
-                        <div class="error-message">${message}</div>
-                        <div class="error-actions">
-                            <button onclick="window.vrSystem.hideVRSelection(); window.vrSystem.vrNotification.classList.remove('show');" class="error-btn-close">Fechar</button>
-                            <button onclick="window.vrSystem.showVRSelection(); window.vrSystem.vrNotification.classList.remove('show');" class="error-btn-retry">Tentar Novamente</button>
-                        </div>
-                    `;
-                    this.vrNotification.classList.add('error');
-                    this.vrNotification.classList.add('show');
-                    
-                    // Não remover automaticamente para que o usuário leia
-                    // setTimeout(() => {
-                    //     this.vrNotification.classList.remove('show');
-                    // }, 8000);
-                }
+
+            forceCrosshairForQuest() {
+    // ATIVAR SISTEMA DE MIRA
+    if (window.crosshairSystem) {
+        window.crosshairSystem.show();
+        window.crosshairSystem.setVRMode(true);
+        window.crosshairSystem.isActive = true;
+    }
+    
+    // FORÇAR ELEMENTOS DOM
+    const crosshair = document.getElementById('crosshairPointer');
+    const progress = document.getElementById('crosshairProgress');
+    const tooltip = document.getElementById('crosshairTooltip');
+    
+    if (crosshair) {
+        crosshair.style.cssText = `
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            z-index: 30000 !important;
+            pointer-events: none !important;
+            width: 40px !important;
+            height: 40px !important;
+        `;
+        console.log("🎯 Mira FORÇADA para Quest 2!");
+    }
+    
+    if (progress) {
+        progress.style.display = 'block !important';
+        progress.style.zIndex = '30000';
+    }
+    
+    if (tooltip) {
+        tooltip.style.display = 'block !important';
+        tooltip.style.zIndex = '30000';
+    }
+}
+
+startQuestCrosshairLoop() {
+    const updateCrosshair = () => {
+        if (this.isVRActive && this.currentMode === 'quest') {
+            // GARANTIR QUE A MIRA CONTINUE VISÍVEL
+            const crosshair = document.getElementById('crosshairPointer');
+            if (crosshair && crosshair.style.display === 'none') {
+                this.forceCrosshairForQuest();
             }
+            
+            // ATUALIZAR SISTEMA DE MIRA
+            if (window.crosshairSystem && window.crosshairSystem.isActive) {
+                window.crosshairSystem.update();
+            }
+            
+            requestAnimationFrame(updateCrosshair);
+        }
+    };
+    
+    requestAnimationFrame(updateCrosshair);
+}
+
+createVRCrosshair() {
+    // REMOVER MIRA ANTERIOR SE EXISTIR
+    if (this.vrCrosshair3D) {
+        window.scene.remove(this.vrCrosshair3D);
+    }
+    
+    // CRIAR MIRA 3D NO CENTRO DA VISÃO
+    const crosshairGeometry = new THREE.RingGeometry(0.02, 0.03, 8);
+    const crosshairMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xffffff, 
+        transparent: true, 
+        opacity: 0.8,
+        side: THREE.DoubleSide
+    });
+    
+    this.vrCrosshair3D = new THREE.Mesh(crosshairGeometry, crosshairMaterial);
+    
+    // POSICIONAR NA FRENTE DA CÂMERA (3 metros de distância)
+    const direction = new THREE.Vector3(0, 0, -3);
+    direction.applyQuaternion(window.camera.quaternion);
+    this.vrCrosshair3D.position.copy(window.camera.position).add(direction);
+    
+    // ORIENTAR A MIRA PARA A CÂMERA
+    this.vrCrosshair3D.lookAt(window.camera.position);
+    
+    // ADICIONAR À CENA
+    window.scene.add(this.vrCrosshair3D);
+    
+    console.log("🎯 Mira 3D criada dentro do VR!");
+}
         }
 
-        // ============= SISTEMA PRINCIPAL ============= 
+        class CrosshairNavigationSystem {
+    constructor() {
+        this.isActive = false;
+        this.currentTarget = null;
+        this.gazeStartTime = 0;
+        this.gazeDuration = 2000; // 2 segundos
+        this.raycaster = new THREE.Raycaster();
+        this.centerPoint = new THREE.Vector2(0, 0); // Centro da tela
+        
+        // Elementos DOM
+        this.crosshair = null;
+        this.arrow = null;
+        this.progress = null;
+        this.progressBar = null;
+        this.tooltip = null;
+        
+        this.init();
+    }
+    
+    init() {
+        console.log("🎯 Sistema de mira configurado (inativo até VR)...");
+        
+        this.crosshair = document.getElementById('crosshairPointer');
+        this.arrow = document.getElementById('crosshairArrow');
+        this.progress = document.getElementById('crosshairProgress');
+        this.progressBar = document.getElementById('crosshairProgressBar');
+        this.tooltip = document.getElementById('crosshairTooltip');
+        
+        // INICIAR ESCONDIDO
+        this.hide();
+        console.log("✅ Mira criada (aparecerá apenas no Quest 2)");
+
+        
+    }
+    
+    show() {
+        if (this.crosshair) {
+            this.crosshair.style.display = 'block';
+            this.isActive = true;
+        }
+    }
+    
+    hide() {
+        if (this.crosshair) {
+            this.crosshair.style.display = 'none';
+            this.isActive = false;
+        }
+    }
+            update() {
+            // VERIFICAR SE ESTÁ ATIVO
+            if (!this.isActive || !window.camera || !window.hotspotSystem) return;
+            if (!window.vrSystem || !window.vrSystem.isVRActive) return;
+            
+            // RAYCASTING DO CENTRO DA TELA
+            this.raycaster.setFromCamera(this.centerPoint, window.camera);
+            
+            // VERIFICAR HOTSPOTS
+            const hotspots = window.hotspotSystem.hotspots.map(h => h.marker).filter(m => m);
+            const intersects = this.raycaster.intersectObjects(hotspots);
+            
+            if (intersects.length > 0) {
+                const target = intersects[0].object;
+                this.handleTargeting(target);
+            } else {
+                this.clearTarget();
+            }
+        }
+    
+    handleTargeting(target) {
+        // NOVO ALVO
+        if (target !== this.currentTarget) {
+            this.currentTarget = target;
+            this.gazeStartTime = Date.now();
+            this.startTargeting();
+        }
+        
+        // CALCULAR PROGRESSO
+        const elapsed = Date.now() - this.gazeStartTime;
+        const progress = Math.min(elapsed / this.gazeDuration, 1);
+        
+        this.updateProgress(progress);
+        
+        // ATIVAR APÓS 2 SEGUNDOS
+        if (progress >= 1) {
+            this.activateTarget();
+        }
+    }
+    
+    startTargeting() {
+        if (!this.currentTarget) return;
+        
+        // VISUAL DA MIRA
+        if (this.crosshair) this.crosshair.classList.add('targeting');
+        if (this.arrow) this.arrow.classList.add('targeting');
+        if (this.progress) this.progress.classList.add('show');
+        
+        // REMOVER TOOLTIP - SÓ MOSTRAR BARRA DE PROGRESSO
+        const hotspotData = this.currentTarget.userData.hotspotData;
+        if (hotspotData && this.tooltip) {
+            // this.tooltip.textContent = `${hotspotData.label}`;
+            // this.tooltip.classList.add('show');
+}
+        
+        console.log(`🎯 Mirando: ${hotspotData?.label || 'Hotspot'}`);
+    }
+    
+    updateProgress(progress) {
+        if (this.progressBar) {
+            this.progressBar.style.width = (progress * 100) + '%';
+        }
+    }
+    
+    activateTarget() {
+    if (!this.currentTarget) {
+        console.log("❌ Nenhum target para ativar");
+        return;
+    }
+    
+    const hotspotData = this.currentTarget.userData.hotspotData;
+    if (hotspotData) {
+        console.log(`🎯 NAVEGAÇÃO POR MIRA CONFIRMADA: ${hotspotData.label} -> sala ${hotspotData.target}`);
+        
+        // ✅ FEEDBACK VISUAL FORTE
+        if (this.currentTarget.material) {
+            this.currentTarget.material.color.setHex(0x00ff00); // Verde
+            setTimeout(() => {
+                this.currentTarget.material.color.setHex(0x808080); // Voltar ao cinza
+            }, 500);
+        }
+        
+        // NAVEGAR IMEDIATAMENTE
+        if (window.hotspotSystem) {
+            window.hotspotSystem.activateHotspot(hotspotData);
+        }
+        
+        // NAVEGAR DIRETAMENTE TAMBÉM (GARANTIA)
+        if (typeof changeRoom === 'function' && hotspotData.target !== undefined) {
+            changeRoom(hotspotData.target);
+        }
+        
+        // VIBRAÇÃO SE MOBILE
+        if (navigator.vibrate) {
+            navigator.vibrate([200, 100, 200]); // Vibração mais forte
+        }
+        
+        // NOTIFICAÇÃO VISUAL
+        if (window.vrSystem && window.vrSystem.showNotification) {
+            window.vrSystem.showNotification(`✅ Navegando para: ${hotspotData.label}`);
+        }
+    } else {
+        console.log("❌ Dados do hotspot não encontrados");
+    }
+    
+    this.clearTarget();
+}
+    
+    clearTarget() {
+        this.currentTarget = null;
+        this.gazeStartTime = 0;
+        
+       // REMOVER VISUAIS
+        if (this.crosshair) this.crosshair.classList.remove('targeting');
+        if (this.arrow) this.arrow.classList.remove('targeting');
+        if (this.progress) {
+            this.progress.classList.remove('show');
+            this.progress.style.display = 'none'; // FORÇAR ESCONDER
+        }
+        if (this.tooltip) {
+            this.tooltip.classList.remove('show');
+            this.tooltip.style.display = 'none'; // FORÇAR ESCONDER
+        }
+        if (this.progressBar) this.progressBar.style.width = '0%';
+    }
+    
+setVRMode(isVR) {
+    if (isVR) {
+        this.show();
+        // FORÇAR VISIBILIDADE NO VR
+        if (this.crosshair) {
+            this.crosshair.style.display = 'block !important';
+            this.crosshair.style.opacity = '1 !important';
+            this.crosshair.style.zIndex = '20000 !important';
+        }
+        console.log("🎯 Mira FORÇADA para VR");
+    } else {
+        this.hide();
+    }
+}
+}
+        // ============= TESTE DIRETO DO VR (ADICIONAR APÓS INICIALIZAÇÃO) =============
+        function forceVRButtonWork() {
+            console.log("🔧 FORÇANDO FUNCIONAMENTO DO BOTÃO VR...");
+            
+            const vrButton = document.getElementById('vrButton');
+            const vrSelectionScreen = document.getElementById('vrSelectionScreen');
+            
+            if (!vrButton) {
+                console.error("❌ Botão VR não encontrado!");
+                return;
+            }
+            
+            if (!vrSelectionScreen) {
+                console.error("❌ Tela de seleção VR não encontrada!");
+                return;
+            }
+            
+            console.log("✅ Elementos VR encontrados, configurando eventos diretos...");
+            
+            // Limpar todos os eventos existentes
+            const newVRButton = vrButton.cloneNode(true);
+            vrButton.parentNode.replaceChild(newVRButton, vrButton);
+            
+            // Garantir estilo correto
+            newVRButton.style.display = 'flex';
+            newVRButton.style.visibility = 'visible';
+            newVRButton.style.opacity = '1';
+            newVRButton.style.pointerEvents = 'auto';
+            newVRButton.style.zIndex = '9999';
+            newVRButton.style.position = 'fixed';
+            newVRButton.style.bottom = '30px';
+            newVRButton.style.right = '30px';
+            
+            // Função para abrir VR
+            function openVRMenu() {
+                console.log("🥽 ABRINDO MENU VR FORÇADAMENTE...");
+                
+                vrSelectionScreen.style.display = 'flex';
+                vrSelectionScreen.style.position = 'fixed';
+                vrSelectionScreen.style.top = '0';
+                vrSelectionScreen.style.left = '0';
+                vrSelectionScreen.style.width = '100vw';
+                vrSelectionScreen.style.height = '100vh';
+                vrSelectionScreen.style.zIndex = '15000';
+                vrSelectionScreen.style.opacity = '0';
+                vrSelectionScreen.style.visibility = 'visible';
+                
+                setTimeout(() => {
+                    vrSelectionScreen.style.opacity = '1';
+                    vrSelectionScreen.classList.add('visible');
+                    console.log("✅ Menu VR aberto com sucesso!");
+                }, 50);
+            }
+            
+            // Adicionar múltiplos eventos
+            newVRButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("🖱️ CLICK DETECTADO NO BOTÃO VR!");
+                openVRMenu();
+            });
+            
+            newVRButton.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("🖱️ MOUSEDOWN DETECTADO NO BOTÃO VR!");
+                openVRMenu();
+            });
+            
+            newVRButton.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("📱 TOUCHSTART DETECTADO NO BOTÃO VR!");
+                openVRMenu();
+            });
+            
+            newVRButton.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("📱 TOUCHEND DETECTADO NO BOTÃO VR!");
+                openVRMenu();
+            });
+            
+            // Configurar botão de fechar
+            const vrCloseBtn = document.getElementById('vrCloseBtn');
+            if (vrCloseBtn) {
+                vrCloseBtn.addEventListener('click', function() {
+                    console.log("❌ Fechando menu VR...");
+                    vrSelectionScreen.classList.remove('visible');
+                    setTimeout(() => {
+                        vrSelectionScreen.style.display = 'none';
+                        // Continuar renderização normal do tour em tempo real
+                        console.log("✅ Tour em tempo real restaurado");
+                    }, 400);
+                });
+            }
+            
+            // Configurar opções VR
+            const gyroModeBtn = document.getElementById('gyroModeBtn');
+            const stereoModeBtn = document.getElementById('stereoModeBtn');
+            
+            if (gyroModeBtn) {
+                gyroModeBtn.addEventListener('click', function() {
+                    console.log("📱 Modo Gyro selecionado");
+                    alert("Modo VR Livre ativado! (Esta é uma demonstração)");
+                    vrSelectionScreen.style.display = 'none';
+                });
+            }
+            
+            if (questModeBtn) {
+                questModeBtn.addEventListener('click', function() {
+                    console.log("🥽 Modo Quest 2 selecionado");
+                    alert("Conectando com Oculos Quest 2...\n\nPara usar este modo:\n1. Acesse este site no navegador do Quest 2\n2. Permita acesso VR quando solicitado\n3. Use os controles para navegar");
+                    vrSelectionScreen.style.display = 'none';
+                });
+            }
+            
+            console.log("✅ BOTÃO VR CONFIGURADO COM EVENTOS DIRETOS!");
+            
+            // Teste imediato
+            setTimeout(() => {
+                console.log("🧪 TESTE: Verificando se o botão está clicável...");
+                const rect = newVRButton.getBoundingClientRect();
+                console.log("📏 Posição do botão:", rect);
+                console.log("📏 Botão visível?", rect.width > 0 && rect.height > 0);
+            }, 500);
+        } 
         let scene, camera, renderer, sphere;
         let isMouseDown = false;
         let mouseX = 0, mouseY = 0;
         let targetRotationX = 0, targetRotationY = 0;
         let rotationX = 0, rotationY = 0;
-        let currentRoom = 1; // Começar no EXTERIOR 1
+        let currentRoom = 1; // COMEÇAR NO EXTERIOR 1 (como estava antes)
         let hotspotSystem;
         let raycaster, mouse;
         let vrSystem;
         
         const rooms = [
-            { name: "Home", texturePath: "HOME.jpg", description: "Página inicial do tour" },
-            { name: "Exterior 1", texturePath: "EXTERIOR1.jpg", description: "Vista externa frontal" },
-            { name: "Exterior 2", texturePath: "EXTERIOR2.jpg", description: "Vista externa lateral" },
-            { name: "Exterior 3", texturePath: "EXTERIOR3.jpg", description: "Vista externa fundos" },
-            { name: "Exterior 4", texturePath: "EXTERIOR4.jpg", description: "Vista externa completa" },
-            { name: "Exterior 5", texturePath: "EXTERIOR5.jpg", description: "Vista externa jardim" },
-            { name: "Exterior 6", texturePath: "EXTERIOR6.jpg", description: "Vista externa entrada" },
-            { name: "Sala 1", texturePath: "SALA1.jpg", description: "Sala de estar principal" },
-            { name: "Sala 2", texturePath: "SALA2.jpg", description: "Sala de jantar" },
-            { name: "Sala 3", texturePath: "SALA3.jpg", description: "Sala de TV" },
-            { name: "Cozinha", texturePath: "COZINHA.jpg", description: "Cozinha equipada" },
-            { name: "Suite 1", texturePath: "QUARTO1.jpg", description: "Suíte master" },
-            { name: "Suite 2", texturePath: "QUARTO2.jpg", description: "Segunda suíte" },
-            { name: "Banheiro Suite 2", texturePath: "BANHEIROQUARTO2.jpg", description: "Banheiro da suíte 2" },
-            { name: "Banheiro Sauna", texturePath: "BANHEIROSAUNA.jpg", description: "Banheiro com sauna" },
-            { name: "Despensa", texturePath: "DESPENSA.jpg", description: "Área de despensa" },
-            { name: "Lavanderia", texturePath: "LAVANDERIA.jpg", description: "Área de serviço" },
-            { name: "Lavabo", texturePath: "LAVABO.jpg", description: "Lavabo social" }
+            // NOVO CÔMODO HOME NO ÍNDICE 0
+            { texturePath: "HOME.jpg" },
+            { texturePath: "EXTERIOR1.jpg"},
+            { texturePath: "EXTERIOR2.jpg"},
+            { texturePath: "EXTERIOR3.jpg" },
+            { texturePath: "EXTERIOR4.jpg" },
+            { texturePath: "EXTERIOR5.jpg"},
+            { texturePath: "EXTERIOR6.jpg"},
+            { texturePath: "SALA1.jpg"},
+            { texturePath: "SALA2.jpg" },
+            { texturePath: "SALA3.jpg"},
+            { texturePath: "COZINHA.jpg"},
+            { texturePath: "QUARTO1.jpg"},
+            { texturePath: "QUARTO2.jpg" },
+            { texturePath: "BANHEIROQUARTO2.jpg"},
+            { texturePath: "BANHEIROSAUNA.jpg"},
+            { texturePath: "DESPENSA.jpg"},
+            { texturePath: "LAVANDERIA.jpg"},
+            { texturePath: "LAVABO.jpg" }
         ];
 
-        // Sistema da planta baixa
+        // Variáveis do menu da planta
         let floorPlanMenu = {
             isOpen: false,
-            currentRoom: 1
+            currentRoom: 1 // COMEÇAR NO EXTERIOR 1
         };
 
+        // ============= SISTEMA DA PLANTA BAIXA ============= 
         function initializeFloorPlanMenu() {
             const toggleBtn = document.getElementById('floorPlanToggle');
             const closeBtn = document.getElementById('closeMenuBtn');
@@ -1876,8 +3843,9 @@
             floorPlanMenu.currentRoom = roomIndex;
         }
 
+        // ============= SISTEMA PRINCIPAL ============= 
         function init() {
-            console.log("🎬 Inicializando Tour VR completo...");
+            console.log("🎬 Inicializando Three.js - Debug hotspots...");
             
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -1890,7 +3858,7 @@
             if (typeof THREE !== 'undefined') {
                 raycaster = new THREE.Raycaster();
                 mouse = new THREE.Vector2();
-                console.log("✅ Raycaster configurado");
+                console.log("✅ Raycaster e mouse configurados");
             }
             
             const viewer = document.getElementById('viewer');
@@ -1899,17 +3867,10 @@
                 viewer.appendChild(renderer.domElement);
             }
             
-            // Disponibilizar globalmente
-            window.scene = scene;
-            window.camera = camera;
-            window.renderer = renderer;
-            window.raycaster = raycaster;
-            window.mouse = mouse;
-            
             hotspotSystem = new InteractiveHotspotSystem(scene, camera, renderer);
-            window.hotspotSystem = hotspotSystem;
-            
-            vrSystem = new OculusVRSystem();
+            crosshairSystem = new CrosshairNavigationSystem();
+            window.crosshairSystem = crosshairSystem;
+            vrSystem = new AdvancedVRSystem();
             vrSystem.init();
 
             createEnvironment();
@@ -1926,7 +3887,31 @@
             initializeFloorPlanMenu();
             animate();
             console.log(`✅ Tour inicializado! Sala atual: ${currentRoom} (${rooms[currentRoom]?.name})`);
-        }
+
+            // CONFIGURAR WEBXR
+            if (window.renderer) {
+                window.renderer.xr.enabled = false; // Será ativado apenas no modo VR
+                console.log("✅ WebXR configurado no renderer");
+            }
+
+            // EXPOR VARIÁVEIS GLOBALMENTE PARA VR
+            window.scene = scene;
+            window.camera = camera;
+            window.renderer = renderer;
+            window.hotspotSystem = hotspotSystem;
+            window.raycaster = raycaster;
+            window.mouse = mouse;
+
+            // GARANTIR BOTÃO VR APÓS TUDO CARREGAR
+            setTimeout(() => {
+                if (vrSystem) {
+                    vrSystem.checkDeviceSupport();
+                    console.log("🔄 VR reconfigurado após init");
+                }
+            }, 1000);
+
+        
+                    }
 
         function createEnvironment() {
             console.log(`🌍 Criando ambiente: ${rooms[currentRoom].name}`);
@@ -1987,23 +3972,28 @@
             return new THREE.CanvasTexture(canvas);
         }
 
+        // ========== CONTROLES SIMPLIFICADOS E OTIMIZADOS ========== 
         function setupControls() {
             const viewer = document.getElementById('viewer');
             
+            // Variáveis de controle
             let isDragging = false;
             let touchStartTime = 0;
             let touchStartX = 0, touchStartY = 0;
             
+            // FUNÇÃO MELHORADA PARA ATIVAR HOTSPOT (MAIS PRECISA)
             function tryActivateHotspot(clientX, clientY) {
                 try {
                     if (!raycaster || !mouse || !hotspotSystem || !hotspotSystem.hotspots) return false;
                     
                     const rect = viewer.getBoundingClientRect();
+                    // PRECISÃO MELHORADA
                     mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
                     mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
                     
                     raycaster.setFromCamera(mouse, camera);
                     
+                    // BUSCAR HOTSPOTS COM PRECISÃO APRIMORADA
                     const hotspotMeshes = [];
                     hotspotSystem.hotspots.forEach(hotspot => {
                         if (hotspot && hotspot.marker) {
@@ -2014,17 +4004,28 @@
                         }
                     });
                     
-                    if (hotspotMeshes.length === 0) return false;
+                    if (hotspotMeshes.length === 0) {
+                        console.log("🔍 Nenhum hotspot encontrado para testar");
+                        return false;
+                    }
+                    
+                    // CONFIGURAR RAYCASTER PARA SER MAIS PRECISO
+                    raycaster.params.Points.threshold = 0.3;
+                    raycaster.near = 0.1;
+                    raycaster.far = 1000;
                     
                     const intersects = raycaster.intersectObjects(hotspotMeshes);
                     
                     if (intersects.length > 0) {
                         const intersectedObject = intersects[0].object;
+                        console.log(`🎯 Objeto interceptado:`, intersectedObject);
                         
+                        // BUSCAR DADOS DO HOTSPOT (MELHORADA)
                         let hotspotData = null;
                         if (intersectedObject.userData && intersectedObject.userData.hotspotData) {
                             hotspotData = intersectedObject.userData.hotspotData;
                         } else {
+                            // Buscar nos hotspots se clicou no ring
                             for (let hotspot of hotspotSystem.hotspots) {
                                 if ((hotspot.ring === intersectedObject || hotspot.marker === intersectedObject) && hotspot.data) {
                                     hotspotData = hotspot.data;
@@ -2034,66 +4035,124 @@
                         }
                         
                         if (hotspotData && hotspotData.target !== undefined) {
-                            console.log(`🎯 Hotspot ativado: ${hotspotData.label}`);
+                            console.log(`🎯 Hotspot ativado com precisão: ${hotspotData.label}`);
                             
+                            // FEEDBACK VISUAL E TÁTIL
                             if (navigator.vibrate) {
                                 navigator.vibrate(50);
                             }
                             
+                            // ANIMAÇÃO DO HOTSPOT CLICADO
+                            if (intersectedObject.scale) {
+                                intersectedObject.scale.set(1.3, 1.3, 1.3);
+                                setTimeout(() => {
+                                    intersectedObject.scale.set(1, 1, 1);
+                                }, 200);
+                            }
+                            
+                            // NAVEGAR IMEDIATAMENTE
                             changeRoom(hotspotData.target);
                             return true;
+                        } else {
+                            console.log("❌ Dados do hotspot não encontrados");
                         }
+                    } else {
+                        console.log("🔍 Nenhuma interseção detectada");
                     }
                 } catch (error) {
-                    console.error('Erro na detecção de hotspot:', error);
+                    console.error('Erro na detecção precisa de hotspot:', error);
                 }
                 return false;
             }
             
-            // Touch events
-            viewer.addEventListener('touchstart', (e) => {
-                if (vrSystem && vrSystem.isVRActive) return;
-                
-                if (e.touches.length === 1) {
-                    const touch = e.touches[0];
-                    
-                    isDragging = false;
-                    isMouseDown = true;
-                    touchStartTime = Date.now();
-                    
-                    touchStartX = mouseX = touch.clientX;
-                    touchStartY = mouseY = touch.clientY;
-                    
-                    e.preventDefault();
-                }
+            // ============= EVENTOS TOUCH MAIS PRECISOS ============= 
+viewer.addEventListener('touchstart', (e) => {
+    // ✅ BLOQUEAR APENAS SE ESTIVER NO MODO VR LIVRE
+    if (vrSystem && vrSystem.isVRActive && vrSystem.currentMode === 'gyro') {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("🚫 Touch bloqueado - modo VR livre ativo");
+        return false;
+    }
+    
+    // 🔥 TOUCH NORMAL CONTINUA FUNCIONANDO
+    if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        
+        isDragging = false;
+        isMouseDown = true;
+        touchStartTime = Date.now();
+        
+        touchStartX = mouseX = touch.clientX;
+        touchStartY = mouseY = touch.clientY;
+        
+        console.log(`📱 Touch start: (${touch.clientX}, ${touch.clientY})`);
+        e.preventDefault();
+    }
+}, { passive: false });
+
+viewer.addEventListener('touchmove', (e) => {
+    // ✅ BLOQUEAR APENAS SE ESTIVER NO MODO VR LIVRE
+    if (vrSystem && vrSystem.isVRActive && vrSystem.currentMode === 'gyro') {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+    
+    // 🔥 TOUCH NORMAL CONTINUA FUNCIONANDO
+    if (e.touches.length === 1 && isMouseDown) {
+        const touch = e.touches[0];
+        
+        const deltaX = Math.abs(touch.clientX - touchStartX);
+        const deltaY = Math.abs(touch.clientY - touchStartY);
+        
+        if (deltaX > 5 || deltaY > 5) {
+            isDragging = true;
+            
+            const rotX = touch.clientX - mouseX;
+            const rotY = touch.clientY - mouseY;
+            
+            targetRotationY += rotX * 0.005;
+            targetRotationX += rotY * 0.005;
+            targetRotationX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, targetRotationX));
+            
+            mouseX = touch.clientX;
+            mouseY = touch.clientY;
+        }
+        
+        e.preventDefault();
+    }
+}, { passive: false });
+
+viewer.addEventListener('touchend', (e) => {
+    // ✅ BLOQUEAR APENAS SE ESTIVER NO MODO VR LIVRE
+    if (vrSystem && vrSystem.isVRActive && vrSystem.currentMode === 'gyro') {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+    
+    // 🔥 TOUCH NORMAL CONTINUA FUNCIONANDO
+    if (e.changedTouches.length === 1) {
+        const touch = e.changedTouches[0];
+        const touchDuration = Date.now() - touchStartTime;
+        const deltaX = Math.abs(touch.clientX - touchStartX);
+        const deltaY = Math.abs(touch.clientY - touchStartY);
+        
+        if (!isDragging && touchDuration < 300 && deltaX < 15 && deltaY < 15) {
+            console.log(`📱 TAP PRECISO DETECTADO: (${touch.clientX}, ${touch.clientY})`);
+            const activated = tryActivateHotspot(touch.clientX, touch.clientY);
+            if (!activated) {
+                console.log("❌ Nenhum hotspot ativado no toque");
+            }
+            e.preventDefault();
+        }
+    }
+    
+                isDragging = false;
+                isMouseDown = false;
             }, { passive: false });
             
-            viewer.addEventListener('touchmove', (e) => {
-                if (vrSystem && vrSystem.isVRActive) return;
-                
-                if (e.touches.length === 1 && isMouseDown) {
-                    const touch = e.touches[0];
-                    
-                    const deltaX = Math.abs(touch.clientX - touchStartX);
-                    const deltaY = Math.abs(touch.clientY - touchStartY);
-                    
-                    if (deltaX > 5 || deltaY > 5) {
-                        isDragging = true;
-                        
-                        const rotX = touch.clientX - mouseX;
-                        const rotY = touch.clientY - mouseY;
-                        
-                        targetRotationY += rotX * 0.005;
-                        targetRotationX += rotY * 0.005;
-                        targetRotationX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, targetRotationX));
-                        
-                        mouseX = touch.clientX;
-                        mouseY = touch.clientY;
-                    }
-                    
-                    e.preventDefault();
-                }
-            }, { passive: false });
             
             viewer.addEventListener('touchend', (e) => {
                 if (vrSystem && vrSystem.isVRActive) return;
@@ -2104,18 +4163,25 @@
                     const deltaX = Math.abs(touch.clientX - touchStartX);
                     const deltaY = Math.abs(touch.clientY - touchStartY);
                     
-                    if (!isDragging && touchDuration < 300 && deltaX < 15 && deltaY < 15) {
-                        console.log(`📱 TAP detectado: (${touch.clientX}, ${touch.clientY})`);
-                        tryActivateHotspot(touch.clientX, touch.clientY);
+                    // TAP MAIS PRECISO (AREA MENOR)
+                    if (!isDragging && touchDuration < 300 && deltaX < 15 && deltaY < 15) { // Reduzido de 20 para 15
+                        console.log(`📱 TAP PRECISO DETECTADO: (${touch.clientX}, ${touch.clientY})`);
+                        const activated = tryActivateHotspot(touch.clientX, touch.clientY);
+                        if (!activated) {
+                            console.log("❌ Nenhum hotspot ativado no toque");
+                        }
                         e.preventDefault();
+                    } else {
+                        console.log(`📱 Movimento detectado - não é tap: drag=${isDragging}, duration=${touchDuration}, deltaX=${deltaX}, deltaY=${deltaY}`);
                     }
                 }
                 
+                // Reset
                 isDragging = false;
                 isMouseDown = false;
             }, { passive: false });
             
-            // Mouse events
+            // ============= EVENTOS MOUSE MAIS PRECISOS (DESKTOP) ============= 
             viewer.addEventListener('mousedown', (e) => {
                 if (vrSystem && vrSystem.isVRActive) return;
                 
@@ -2126,6 +4192,7 @@
                 mouseX = e.clientX;
                 mouseY = e.clientY;
                 
+                console.log(`🖱️ Mouse down: (${e.clientX}, ${e.clientY})`);
                 viewer.style.cursor = 'grabbing';
             });
             
@@ -2136,7 +4203,8 @@
                     const deltaX = Math.abs(e.clientX - mouseX);
                     const deltaY = Math.abs(e.clientY - mouseY);
                     
-                    if (deltaX > 3 || deltaY > 3) {
+                    // DETECTAR MOVIMENTO MENOR (MAIS SENSÍVEL)
+                    if (deltaX > 3 || deltaY > 3) { // Reduzido para desktop também
                         isDragging = true;
                     }
                     
@@ -2157,9 +4225,15 @@
                 
                 e.preventDefault();
                 
+                // CLIQUE MAIS PRECISO
                 if (!isDragging) {
-                    console.log(`🖱️ CLIQUE detectado: (${e.clientX}, ${e.clientY})`);
-                    tryActivateHotspot(e.clientX, e.clientY);
+                    console.log(`🖱️ CLIQUE PRECISO DETECTADO: (${e.clientX}, ${e.clientY})`);
+                    const activated = tryActivateHotspot(e.clientX, e.clientY);
+                    if (!activated) {
+                        console.log("❌ Nenhum hotspot ativado no clique");
+                    }
+                } else {
+                    console.log("🖱️ Movimento detectado - não é clique");
                 }
                 
                 isDragging = false;
@@ -2167,6 +4241,7 @@
                 viewer.style.cursor = 'grab';
             });
             
+            // Outros eventos
             viewer.addEventListener('wheel', (e) => {
                 if (vrSystem && vrSystem.isVRActive) return;
                 e.preventDefault();
@@ -2181,13 +4256,15 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
             
-            console.log("✅ Controles configurados!");
+            console.log("✅ Controles otimizados configurados!");
         }
 
         function animate() {
             try {
                 requestAnimationFrame(animate);
 
+                // Aplicar rotação suave apenas se VR não estiver ativo
+               if (!vrSystem || (!vrSystem.isVRActive) || (vrSystem.isVRActive && vrSystem.currentMode !== 'gyro')) {
                 if (!vrSystem || !vrSystem.isVRActive) {
                     rotationX += (targetRotationX - rotationX) * 0.1;
                     rotationY += (targetRotationY - rotationY) * 0.1;
@@ -2197,18 +4274,26 @@
                     camera.rotation.x = rotationX;
                     camera.rotation.z = 0;
                 }
+            }
 
+                // Animar hotspots de forma segura
                 if (hotspotSystem && hotspotSystem.hotspots) {
                     hotspotSystem.animate();
                 }
 
-                if (!vrSystem || vrSystem.currentMode !== 'quest') {
+               if (crosshairSystem && vrSystem && vrSystem.isVRActive && (vrSystem.currentMode === 'quest' || vrSystem.currentMode === 'gyro')) {
+    crosshairSystem.update();
+}
+                // Renderizar apenas se não estiver em modo VR estereoscópico
+                if (!vrSystem || vrSystem.currentMode !== 'stereo') {
                     renderer.render(scene, camera);
                 }
             } catch (error) {
                 console.error('Erro no loop de animação:', error);
             }
-        }
+    
+}
+        
 
         function changeRoom(index) {
             try {
@@ -2221,12 +4306,11 @@
                     resetView();
                     updateFloorPlanCurrentRoom(currentRoom);
                     
+                    // Criar hotspots após um delay menor
                     if (hotspotSystem) {
                         try {
-                            setTimeout(() => {
-                                hotspotSystem.createHotspots(currentRoom);
-                                console.log(`✅ Hotspots criados para: ${rooms[index].name}`);
-                            }, 500);
+                            hotspotSystem.createHotspots(currentRoom);
+                            console.log(`✅ Hotspots criados para: ${rooms[index].name}`);
                         } catch (error) {
                             console.error('Erro ao criar hotspots:', error);
                         }
@@ -2240,10 +4324,11 @@
         function updateRoomInfo() {
             const room = rooms[currentRoom];
             document.querySelector('.room-title').textContent = room.name;
-            document.querySelector('.room-description').textContent = room.description;
+            document.querySelector('.room-description').textContent = room.description ;
         }
 
         function resetView() {
+            // Resetar apenas se não estiver em VR
             if (!vrSystem || !vrSystem.isVRActive) {
                 targetRotationX = 0;
                 targetRotationY = 0;
@@ -2255,7 +4340,7 @@
 
         // ============= INICIALIZAÇÃO PRINCIPAL =============
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("📱 DOM carregado - Tour VR com Oculus Quest 2");
+            console.log("📱 DOM carregado - Versão responsiva com dois botões de entrada");
             
             if (typeof THREE === 'undefined') {
                 console.error("❌ THREE.js não carregou!");
@@ -2271,6 +4356,7 @@
                 return;
             }
 
+            // FUNÇÃO COMUM PARA INICIAR O TOUR
             function startTour(mode) {
                 console.log(`🎬 Iniciando tour em modo: ${mode}`);
                 
@@ -2292,14 +4378,54 @@
                         init();
                         updateRoomInfo();
                         
+                        // Armazenar o modo selecionado
                         window.tourMode = mode;
+                        
+                        // Se modo mobile, mostrar dica sobre VR
+                        if (mode === 'mobile') {
+                            setTimeout(() => {
+                                if (vrSystem && vrSystem.vrButton && vrSystem.vrButton.style.display === 'flex') {
+                                    console.log("📱 Modo mobile ativo - VR disponível");
+                                    // Poderia mostrar uma dica sobre o botão VR aqui
+                                }
+                            }, 3000);
+                        }
                         
                         setTimeout(() => {
                             if (hotspotSystem) {
                                 console.log(`🔧 Criando hotspots para sala ${currentRoom} (${rooms[currentRoom]?.name}) em modo ${mode}`);
                                 hotspotSystem.createHotspots(currentRoom);
                                 console.log(`✅ Hotspots criados em modo ${mode}!`);
+                            } else {
+                                console.error("❌ hotspotSystem não está disponível!");
                             }
+                            
+                            // TESTE ADICIONAL DO VR APÓS INICIALIZAÇÃO COMPLETA
+                            setTimeout(() => {
+                                console.log("🧪 Testando sistema VR após inicialização completa...");
+                                const vrBtn = document.getElementById('vrButton');
+                                if (vrBtn) {
+                                    console.log("✅ Botão VR encontrado no teste!");
+                                    console.log("🔍 Display:", window.getComputedStyle(vrBtn).display);
+                                    console.log("🔍 Visibility:", window.getComputedStyle(vrBtn).visibility);
+                                    console.log("🔍 Opacity:", window.getComputedStyle(vrBtn).opacity);
+                                    console.log("🔍 Pointer Events:", window.getComputedStyle(vrBtn).pointerEvents);
+                                    
+                                    // Forçar visibilidade se necessário
+                                    vrBtn.style.display = 'flex';
+                                    vrBtn.style.visibility = 'visible';
+                                    vrBtn.style.opacity = '1';
+                                    vrBtn.style.pointerEvents = 'auto';
+                                    vrBtn.style.zIndex = '2500';
+                                    
+                                    console.log("✅ Botão VR forçado a ficar visível!");
+                                    
+                                    // FORÇAR FUNCIONAMENTO DO VR
+                                    forceVRButtonWork();
+                                } else {
+                                    console.error("❌ Botão VR não encontrado no teste!");
+                                }
+                            }, 1000);
                         }, 1500);
                         
                     } catch (error) {
@@ -2309,6 +4435,7 @@
                 }, 500);
             }
             
+            // EVENT LISTENERS PARA OS BOTÕES
             startDesktopBtn.addEventListener('click', () => {
                 startTour('desktop');
             });
@@ -2316,9 +4443,145 @@
             startMobileBtn.addEventListener('click', () => {
                 startTour('mobile');
             });
+            
+            // Eventos para sair do fullscreen
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement && vrSystem && vrSystem.isVRActive) {
+                    vrSystem.exitVR();
+                }
+            });
+
+            // DETECÇÃO AUTOMÁTICA (sem destaque visual)
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isSmallScreen = window.innerWidth <= 768;
+            
+            if (isMobileDevice || isSmallScreen) {
+                console.log("📱 Dispositivo mobile detectado");
+            } else {
+                console.log("🖥️ Dispositivo desktop detectado");
+            }
         });
 
-        console.log("📜 Tour VR com Oculus Quest 2 e navegação por olhar carregado!");
+        console.log("📜 Script VR responsivo com cômodo HOME carregado com sucesso!");
+
+        // === Mobile touch raycaster fix ===
+        (function(){
+            // Only add once
+            if (!window.__hotspotTouchHandlerAdded) {
+                window.__hotspotTouchHandlerAdded = true;
+                window.addEventListener('touchstart', function(event){
+                    if(!window.hotspotSystem || !window.camera) return;
+                    if(event.touches.length !== 1) return;
+                    const touch = event.touches[0];
+                    const touchX = (touch.clientX / window.innerWidth) * 2 - 1;
+                    const touchY = -(touch.clientY / window.innerHeight) * 2 + 1;
+                    const pointer = new THREE.Vector2(touchX, touchY);
+                    const raycaster = new THREE.Raycaster();
+                    raycaster.setFromCamera(pointer, window.camera);
+                    const markers = window.hotspotSystem.hotspots.map(h => h.marker).filter(Boolean);
+                    const intersects = raycaster.intersectObjects(markers);
+                    if(intersects.length > 0){
+                        const hotspotData = intersects[0].object.userData.hotspotData;
+                        if (hotspotData) {
+                            window.hotspotSystem.activateHotspot(hotspotData);
+                        }
+                    }
+                }, {passive: true});
+                console.log("✅ Touch raycaster para mobile ativado");
+            }
+
+            // === Suporte ao toque no mobile ===
+            window.addEventListener("touchend", function (event) {
+                if (event.changedTouches.length !== 1 || !window.camera || !window.hotspotSystem) return;
+
+                // Verifica se o toque foi em um elemento de UI que não deve ativar o hotspot 3D
+                if (event.target.closest('.floor-plan-menu, .floor-plan-toggle, .vr-button, .vr-selection-screen, .plan-hotspot')) {
+                    console.log("🚫 Toque em elemento de UI, não ativando hotspot 3D.");
+                    return;
+                }
+                const touch = event.changedTouches[0]; // Correto para touchend
+                const touchX = (touch.clientX / window.innerWidth) * 2 - 1;
+                const touchY = -(touch.clientY / window.innerHeight) * 2 + 1;
+                const pointer = new THREE.Vector2(touchX, touchY);
+                const raycaster = new THREE.Raycaster();
+                raycaster.setFromCamera(pointer, window.camera);
+
+                const markers = window.hotspotSystem.hotspots.map(h => h.marker).filter(Boolean);
+                const intersects = raycaster.intersectObjects(markers);
+                if (intersects.length > 0) {
+                    const hotspotData = intersects[0].object.userData.hotspotData;
+                    if (hotspotData) {
+                        window.hotspotSystem.activateHotspot(hotspotData);
+                    }
+                }
+            }, { passive: true });
+        })();
+
+
+        // 🚨 CÓDIGO DE EMERGÊNCIA - FORÇAR MIRA NO VR
+function forceShowCrosshair() {
+    const crosshair = document.getElementById('crosshairPointer');
+    const progress = document.getElementById('crosshairProgress');
+    const tooltip = document.getElementById('crosshairTooltip');
+    
+    if (crosshair) {
+        crosshair.style.cssText = `
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            z-index: 99999 !important;
+            width: 40px !important;
+            height: 40px !important;
+            pointer-events: none !important;
+        `;
+        console.log("🎯 MIRA FORÇADA EMERGÊNCIA!");
+    }
+    
+    if (progress) {
+        progress.style.display = 'block !important';
+        progress.style.zIndex = '99999';
+    }
+    
+    if (tooltip) {
+        tooltip.style.display = 'block !important';
+        tooltip.style.zIndex = '99999';
+    }
+}
+
+// Executar quando entrar no VR
+document.addEventListener('click', function(e) {
+    if (e.target.closest('#gyroModeBtn')) {
+        setTimeout(forceShowCrosshair, 500);
+        setTimeout(forceShowCrosshair, 1000);
+        setTimeout(forceShowCrosshair, 2000);
+    }
+});
+
+// 🎯 FORÇAR MIRA A FUNCIONAR NO GYRO
+setInterval(() => {
+    if (window.vrSystem && window.vrSystem.isVRActive && window.vrSystem.currentMode === 'gyro') {
+        if (window.crosshairSystem && !window.crosshairSystem.isActive) {
+            console.log("🔧 Reativando mira...");
+            window.crosshairSystem.show();
+            window.crosshairSystem.setVRMode(true);
+            window.crosshairSystem.isActive = true;
+        }
+        
+        // Garantir visibilidade da mira
+        const crosshair = document.getElementById('crosshairPointer');
+        if (crosshair && crosshair.style.display === 'none') {
+            crosshair.style.display = 'block !important';
+            crosshair.style.opacity = '1 !important';
+            console.log("🎯 Mira forçada a aparecer!");
+        }
+    }
+}, 1000); // Verificar a cada 1 segundo
+
+
     </script>
 </body>
 </html>
